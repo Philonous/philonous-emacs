@@ -1,6 +1,7 @@
 (require 'haskell-mode-autoloads)
 (require 'hare)
 (require 'custom-functions)
+(require 'haskell-importer)
 
 (setq auto-mode-alist (cons '("\\.hs$" . haskell-mode) auto-mode-alist))
 
@@ -75,11 +76,6 @@
         (define-key haskell-mode-map (kbd "<backspace>") 'backward-delete-char)
         (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-clear-interactive-window)
         (define-key haskell-mode-map (kbd "C-c r") 'haskell-process-restart-and-load-file)
-        ;; (define-key haskell-mode-map (kbd "-") 'smart-hyphen)
-        (ghc-init)
-        (hare-init)
-        ;;    (progn (require 'shm) (structured-haskell-mode))
-        (setq ghc-toggle-key "C-c C-f")
         (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
         (define-key haskell-mode-map (kbd "C-c p") 'check-parens)
         (define-key haskell-mode-map (kbd "C-c l") 'send-text-to-haskell-process)
@@ -93,8 +89,8 @@
         (define-key haskell-mode-map (kbd "C-c k") 'swap-underscore-camelcase)
         (define-key haskell-mode-map (kbd "C-<right>") 'paredit-forward-slurp-sexp)
         (define-key haskell-mode-map (kbd "C-c d") 'haskell-cabal-add-dependency)
-
-
+        (define-key haskell-mode-map (kbd "M-n") 'forward-paragraph)
+        (define-key haskell-mode-map (kbd "M-p") 'backward-paragraph)
         (define-key haskell-debug-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
         ))
 
@@ -103,3 +99,18 @@
              (define-key haskell-interactive-mode-map (kbd "M-`") 'haskell-go-to-old-window)
              (define-key haskell-interactive-mode-map (kbd "C-`") 'haskell-go-to-old-window)
              ))
+
+(custom-set-variables
+ '(haskell-compile-cabal-build-command
+    "cd %s; cabal install --ghc-option=-ferror-spans --enable-tests && cabal configure --enable-tests")
+ '(haskell-indentation-layout-offset 4)
+ '(haskell-indentation-left-offset 4)
+ '(haskell-process-args-cabal-repl nil)
+ '(haskell-process-log t)
+ '(haskell-process-path-cabal "/home/uart14/.cabal/bin/cabal")
+ '(haskell-process-path-cabal-ghci "/home/uart14/.cabal/bin/cabal")
+ '(haskell-process-suggest-overloaded-strings nil)
+ '(haskell-process-suggest-remove-import-lines nil)
+ '(haskell-process-suggest-restart nil)
+ '(haskell-process-type (quote cabal-repl))
+ '(haskell-tags-on-save t))
