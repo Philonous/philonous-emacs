@@ -1,7 +1,7 @@
 (require 'haskell-mode-autoloads)
 (require 'hare)
 (require 'custom-functions)
-(require 'haskell-importer)
+(require 'haskell-import)
 
 (setq auto-mode-alist (cons '("\\.hs$" . haskell-mode) auto-mode-alist))
 

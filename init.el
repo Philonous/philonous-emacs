@@ -14,8 +14,10 @@
      (add-to-list 'load-path "~/.emacs.d/")
      (add-to-list 'load-path "~/.emacs.d/inits")
      (add-to-list 'load-path "~/.emacs.d/custom-packages")
+     (add-to-list 'load-path "~/.emacs.d/other-packages")
      (require 'custom-functions)
      (add-subdirs-to-load-path "~/.emacs.d/custom-packages")
+     (add-subdirs-to-load-path "~/.emacs.d/other-packages")
 
      (load "global-init")
      (load "haskell-init")
