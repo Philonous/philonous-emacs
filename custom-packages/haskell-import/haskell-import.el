@@ -1,4 +1,4 @@
-3(defvar module-abbrevs
+(defvar module-abbrevs
   nil
   "List of module abbreviatios" )
 
@@ -6,8 +6,10 @@
                                "qualified Data.Text as Text"
                                :language "OverloadedStrings")
                        ("Encoding" "qualified Data.Text.Encoding as Text")
-                       ("Map"  "qualified Data.Map as Map"
-                               "Data.Map (Map)")
+                       ("Map"  "qualified Data.Map.Strict as Map"
+                               "Data.Map.Strict (Map)")
+                       ("HMap" "qualified Data.HashMap.Strict as HMap"
+                               "Data.HashMap.Strict (HashMap)")
                        ("Set" "Data.Set (Set)"
                               "qualified Data.Set as Set")
                        ("App"  "Control.Applicative")
@@ -17,17 +19,24 @@
                        ("BS8"  "qualified Data.ByteString.Char8 as BS8"
                                :language "OverloadedStrings")
                        ("BSL"  "qualified Data.ByteString.Lazy as BSL")
+                       ("BSL8"  "qualified Data.ByteString.Lazy.Char8 as BSL")
                        ("Concurrent" "Control.Concurrent")
                        ("STM" "Control.Concurrent.STM")
                        ("Xmpp" "qualified Network.Xmpp as Xmpp")
-                       ("XML" "qualified Data.XML.Types as XML")
+                       ("XML" "qualified Data.XML.Types as XML"
+                              "Data.XML.Pickle"
+                              :language "OverloadedStrings")
                        ("Ex" "qualified Control.Exception as Ex")
                        ("Monoid" "Data.Monoid")
                        ("Function" "Data.Function")
+                       ("Foldable" "qualified Data.Foldable as Foldable")
+                       ("Traversable" "qualified Data.Traversable as Traversable")
                        ("Ord" "Data.Ord")
                        ("Char" "Data.Char")
                        ("List" "qualified Data.List as List")
+                       ("Lens" "Control.Lens")
                        ("Trans" "Control.Monad.Trans")
+                       ("liftIO" "Control.Monad.Trans")
                        ("Reader" "Control.Monad.Reader")
                        ("State" "Control.Monad.State")
                        ("Writer" "Control.Monad.Writer")
@@ -42,14 +51,25 @@
                        ("Typeable" "Data.Typeable")
                        ("Data" "Data.Data")
                        ("Typeable" "Data.Typeable")
+                       ("Base64" "qualified Data.ByteString.Base64 as Base64")
                        ("DataTypeable"
                           "Data.Typeable" "Data.Data"
                           :language "DeriveDataTypeable")
+                       ("Vector" "Data.Vector (Vector)" "qualified Data.Vector as Vector")
                        ("Free" "Control.Monad.Trans.Free")
+                       ("TH" "Language.Haskell.TH"
+                              :language "TemplateHaskell")
+                       ("QQ" "Language.Haskell.TH"
+                             "Language.Haskell.TH.Quote"
+                              :language "TemplateHaskell")
                        ("fromJust" "Data.Maybe (fromJust)")
                        ("th" :language "TemplateHaskell")
                        ("nmr" :language "NoMonomorphismRestriction")
                        ("ols" :language "OverloadedStrings")
+                       ("qq" :language "QuasiQuotes")
+                       ("gadts" :language "GADTs")
+                       ("lcase" :language "LambdaCase")
+                       ("gnt" :language "GeneralizedNewtypeDeriving")
                        ))
 
 (defun haskell-exists-import-line (line)

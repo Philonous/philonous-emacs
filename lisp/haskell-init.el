@@ -1,7 +1,9 @@
+(add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/")
 (require 'haskell-mode-autoloads)
-(require 'hare)
+(add-to-list 'Info-default-directory-list "~/.emacs.d/other-packages/haskell-mode/")
 (require 'custom-functions)
 (require 'haskell-import)
+(require 'haskell-cabal)
 
 (setq auto-mode-alist (cons '("\\.hs$" . haskell-mode) auto-mode-alist))
 
@@ -19,10 +21,36 @@
   (require 'shm-case-split)
   (define-key haskell-mode-map (kbd "C-c C-s") 'shm-case-split))
 
+(defun haskell-process-set-load-mode (mode)
+  "set the ghci load mode (bytecode, object code, no code)"
+  (haskell-process-do-simple-echo (concat ":set -f" mode "-code") 'haskell-mode))
 
-(setq haskell-mode-hook
-      (lambda ()
-        (require 'ac-haskell-etags)
+(defun haskell-process-set-load-byte-code ()
+  "Set the haskell process to compile to byte code"
+  (interactive)
+  (haskell-process-set-load-mode "byte"))
+
+(defun haskell-process-set-load-no-code ()
+  "Set the haskell process to compile to byte code"
+  (interactive)
+  (haskell-process-set-load-mode "no"))
+
+(defun haskell-process-set-load-object-code ()
+  "Set the haskell process to compile to byte code"
+  (interactive)
+  (haskell-process-set-load-mode "object"))
+
+(defun haskell-process-reload-with-object-code ()
+  "Reload current file with -f-object-code and reset to byte code"
+  (interactive)
+  (haskell-process-set-load-object-code)
+  (haskell-process-load-file)
+  (haskell-process-set-load-byte-code)
+  (haskell-clear-interactive-window)
+  (haskell-process-load-file))
+
+(defun haskell-mode-init ()
+          (require 'ac-haskell-etags)
         (require 'haskell-debug)
         (require 'paredit)
         (haskell-indentation-mode t)
@@ -67,7 +95,10 @@
         (define-key haskell-mode-map (kbd "C-c C-f") 'inferior-haskell-find-definition)
         (define-key haskell-mode-map [?\C-c ?\C-z] 'haskell-interactive-switch)
         (define-key haskell-mode-map (kbd "C-c t") 'haskell-process-do-type )
-        (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-file)
+        (define-key haskell-mode-map (kbd "C-c C-l") (lambda () (interactive)
+                                                       (haskell-clear-interactive-window)
+                                                       (haskell-process-load-file)))
+
         (define-key haskell-mode-map (kbd "C-c C-d") 'haskell-mode-save-buffer-and-tags)
         (define-key haskell-mode-map (kbd "C-`") 'haskell-go-to-haskell-window)
         (define-key haskell-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
@@ -92,7 +123,17 @@
         (define-key haskell-mode-map (kbd "M-n") 'forward-paragraph)
         (define-key haskell-mode-map (kbd "M-p") 'backward-paragraph)
         (define-key haskell-debug-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
-        ))
+        (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-mode-show-type-at)
+        (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
+        (define-key haskell-mode-map (kbd "C-c h") 'section-heading)
+        (define-key haskell-mode-map (kbd "C-c C-x o") 'haskell-process-set-load-object-code)
+        (define-key haskell-mode-map (kbd "C-c C-x b") 'haskell-process-set-load-byte-code)
+        (define-key haskell-mode-map (kbd "C-c C-x n") 'haskell-process-set-load-no-code)
+        (define-key haskell-mode-map (kbd "C-c C-s") 'haskell-process-reload-with-object-code)
+        )
+
+(setq haskell-mode-hook 'haskell-mode-init)
+
 
 (setq haskell-interactive-mode-hook
            (lambda ()
@@ -113,4 +154,18 @@
  '(haskell-process-suggest-remove-import-lines nil)
  '(haskell-process-suggest-restart nil)
  '(haskell-process-type (quote cabal-repl))
- '(haskell-tags-on-save t))
+ '(haskell-tags-on-save t)
+ '(haskell-compile-cabal-build-command "cd %s; cabal install --ghc-option=-ferror-spans --enable-tests && cabal configure --enable-tests")
+ '(haskell-indentation-layout-offset 4)
+ '(haskell-indentation-left-offset 4)
+ '(haskell-process-args-cabal-repl (quote ("--with-ghc=/home/uart14/projects/ghci-ng/.cabal-sandbox/bin/ghci-ng")))
+ '(haskell-process-log t)
+ '(haskell-process-path-cabal "/home/uart14/.cabal/bin/cabal")
+ '(haskell-process-path-cabal-ghci "/home/uart14/.cabal/bin/cabal")
+ '(haskell-process-suggest-overloaded-strings nil)
+ '(haskell-process-suggest-remove-import-lines nil)
+ '(haskell-process-suggest-restart nil)
+ '(haskell-process-type (quote cabal-repl))
+ '(haskell-tags-on-save t)
+
+ )

@@ -105,13 +105,54 @@ C-u 0 M-x enumerate-rectangle"
   (let ((buffer-next-window (window-buffer (next-window))))
   (progn
     (delete-other-windows)
-    (let ((haskell-window (split-window-below -13))
-          (right-window   (split-window-right)))
+    (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
+           (haskell-window (split-window-below -20))
+           (middle-window (split-window-right)))
       (progn
         (set-window-buffer haskell-window haskell-buffer )
         (set-window-dedicated-p haskell-window t )
         (set-window-parameter haskell-window 'no-other-window t)
         (set-window-buffer right-window buffer-next-window )))))))))
+
+(defun layout-for-haskell2 ()
+  (interactive)
+  (save-selected-window
+  (let ((haskell-buffer (get-haskell-buffer)))
+  (progn
+  (mapc 'delete-window (get-buffer-window-list haskell-buffer))
+  (let ((buffer-next-window (window-buffer (next-window))))
+  (progn
+    (delete-other-windows)
+    (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
+           (middle-window (split-window-right))
+           (haskell-window (split-window-below -20))
+           (compile-window (with-selected-window right-window
+                             (split-window-below -20))))
+      (progn
+        (set-window-buffer haskell-window haskell-buffer )
+        (set-window-dedicated-p haskell-window t )
+        (with-selected-window compile-window
+          (switch-to-buffer "*haskell-compilation*")
+          (set-window-dedicated-p compile-window t ))
+        (set-window-parameter haskell-window 'no-other-window t)
+        (set-window-buffer right-window buffer-next-window )))))))))
+
+;; (defun layout-for-haskell ()
+;;   (interactive)
+;;   (save-selected-window
+;;   (let ((haskell-buffer (get-haskell-buffer)))
+;;   (progn
+;;   (mapc 'delete-window (get-buffer-window-list haskell-buffer))
+;;   (let ((buffer-next-window (window-buffer (next-window))))
+;;   (progn
+;;     (delete-other-windows)
+;;     (let ((haskell-window (split-window-below -13))
+;;           (right-window   (split-window-right)))
+;;       (progn
+;;         (set-window-buffer haskell-window haskell-buffer )
+;;         (set-window-dedicated-p haskell-window t )
+;;         (set-window-parameter haskell-window 'no-other-window t)
+;;         (set-window-buffer right-window buffer-next-window )))))))))
 
 (defvar haskell-process-old-window nil)
 
@@ -270,5 +311,45 @@ and the other way around otherwise"
                            (delete-char -1)
                            (upcase next))
                        next))))))
+
+
+(defun byte-compile-reload-dir ()
+  "Byte-compile and reload everything."
+  (interactive)
+  (let ((byte-compile-warnings '(free-vars unresolved callargs redefine make-local mapcar constants suspicious)))
+    (loop for file in (directory-files (file-name-directory (or load-file-name
+                                                                (buffer-file-name)))
+                                       nil
+                                       "^[a-z0-9-]+\\.el$")
+          do (byte-recompile-file file t 0 t))))
+
+(defun fill-hyphens (n)
+  (dotimes (i n) (insert "-")))
+
+(defun section-heading ()
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (looking-at "^[ ]*\\\(--\\\)?[ ]*")
+    (replace-match "-- ")
+    (re-search-forward "[ ]*[-]*[ ]*$" (line-end-position))
+    (replace-match " ")
+    (end-of-line)
+    (let* ((hyphens (- 80 (current-column))))
+      (fill-hyphens hyphens))
+    (previous-line)
+    (beginning-of-line)
+    (unless (looking-at "--[-]*$")
+      (end-of-line)
+      (newline)
+      (fill-hyphens 80))
+    (forward-line 2)
+    (when (and (eobp) (not (= (current-column) 0)) (newline)))
+    (beginning-of-line)
+    (unless (looking-at "--[-]*$")
+      (open-line 1)
+      (fill-hyphens 80))
+    (previous-line)
+    ))
 
 (provide 'custom-functions)
