@@ -23,7 +23,7 @@
 
 (defun haskell-process-set-load-mode (mode)
   "set the ghci load mode (bytecode, object code, no code)"
-  (haskell-process-do-simple-echo (concat ":set -f" mode "-code") 'haskell-mode))
+  (haskell-process-show-repl-response (concat ":set -f" mode "-code")))
 
 (defun haskell-process-set-load-byte-code ()
   "Set the haskell process to compile to byte code"
@@ -102,7 +102,7 @@
         (define-key haskell-mode-map (kbd "C-c C-d") 'haskell-mode-save-buffer-and-tags)
         (define-key haskell-mode-map (kbd "C-`") 'haskell-go-to-haskell-window)
         (define-key haskell-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
-        (define-key haskell-mode-map (kbd "<f11>") 'layout-for-haskell)
+        (define-key haskell-mode-map (kbd "<f11>") 'layout-for-haskell2)
         (define-key haskell-mode-map (kbd "<f8>") 'haskell-navigate-imports)
         (define-key haskell-mode-map (kbd "<backspace>") 'backward-delete-char)
         (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-clear-interactive-window)
@@ -130,6 +130,7 @@
         (define-key haskell-mode-map (kbd "C-c C-x b") 'haskell-process-set-load-byte-code)
         (define-key haskell-mode-map (kbd "C-c C-x n") 'haskell-process-set-load-no-code)
         (define-key haskell-mode-map (kbd "C-c C-s") 'haskell-process-reload-with-object-code)
+        (define-key haskell-mode-map (kbd "<delete>") 'delete-char)
         )
 
 (setq haskell-mode-hook 'haskell-mode-init)
@@ -142,8 +143,6 @@
              ))
 
 (custom-set-variables
- '(haskell-compile-cabal-build-command
-    "cd %s; cabal install --ghc-option=-ferror-spans --enable-tests && cabal configure --enable-tests")
  '(haskell-indentation-layout-offset 4)
  '(haskell-indentation-left-offset 4)
  '(haskell-process-args-cabal-repl nil)
@@ -155,10 +154,10 @@
  '(haskell-process-suggest-restart nil)
  '(haskell-process-type (quote cabal-repl))
  '(haskell-tags-on-save t)
- '(haskell-compile-cabal-build-command "cd %s; cabal install --ghc-option=-ferror-spans --enable-tests && cabal configure --enable-tests")
+ '(haskell-compile-cabal-build-command "cd %s; cabal install --only-dep --enable-tests && cabal configure --enable-tests && cabal build --ghc-option=-ferror-spans")
  '(haskell-indentation-layout-offset 4)
  '(haskell-indentation-left-offset 4)
- '(haskell-process-args-cabal-repl (quote ("--with-ghc=/home/uart14/projects/ghci-ng/.cabal-sandbox/bin/ghci-ng")))
+ '(haskell-process-args-cabal-repl nil ) ;; (quote ("--with-ghc=/home/uart14/projects/ghci-ng/.cabal-sandbox/bin/ghci-ng")))
  '(haskell-process-log t)
  '(haskell-process-path-cabal "/home/uart14/.cabal/bin/cabal")
  '(haskell-process-path-cabal-ghci "/home/uart14/.cabal/bin/cabal")

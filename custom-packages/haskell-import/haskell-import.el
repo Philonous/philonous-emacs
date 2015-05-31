@@ -6,6 +6,7 @@
                                "qualified Data.Text as Text"
                                :language "OverloadedStrings")
                        ("Encoding" "qualified Data.Text.Encoding as Text")
+                       ("Aeson" "qualified Data.Aeson as Aeson")
                        ("Map"  "qualified Data.Map.Strict as Map"
                                "Data.Map.Strict (Map)")
                        ("HMap" "qualified Data.HashMap.Strict as HMap"

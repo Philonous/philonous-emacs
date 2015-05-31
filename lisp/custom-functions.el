@@ -183,7 +183,9 @@ C-u 0 M-x enumerate-rectangle"
 (defun haskell-clear-process-log ()
   (interactive)
   (let ((log-buffer (get-buffer "*haskell-process-log*")))
-    (when log-buffer (with-current-buffer log-buffer (erase-buffer)))))
+    (when log-buffer (with-current-buffer log-buffer
+                       (let ((inhibit-read-only t))
+                         (erase-buffer))))))
 
 (defadvice haskell-interactive-mode-reset-error (after clear-process-log activate)
   "clear the haskell process log when resetting errors"

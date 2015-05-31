@@ -32,6 +32,7 @@
 (global-set-key (kbd "C-x C-m") 'make-frame)
 (global-set-key (kbd "C-c C-p") 'close-open-paren)
 (global-set-key (kbd "C-x g") 'magit-status)
+(global-set-key (kbd "C-c b") 'magit-blame-mode)
 
 (setq compilation-scroll-output t)
 (setq inhibit-splash-screen t)
