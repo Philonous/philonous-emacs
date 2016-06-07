@@ -1,12 +1,6 @@
 (require 'tramp)
 (require 'mon-rectangle-utils)
 
-;; Get rid of stupid key translations
-
-;; Now that <tab> isn't C-i any more, we have to adjust some key maps
-;; (define-key minibuffer-local-map (kbd "<tab>") 'minibuffer-complete)
-;; (global-set-key (kbd "<tab>") 'indent-for-tab-command)
-
 ;; key bindings
 (global-set-key (kbd "C-c <f5>") 'buffer-menu)
 (global-set-key (kbd "C-<tab>") 'other-window)
@@ -34,20 +28,46 @@
 (global-set-key (kbd "C-x g") 'magit-status)
 (global-set-key (kbd "C-c b") 'magit-blame-mode)
 
+(add-to-list 'default-frame-alist '(font . "Anonymous Pro-9"))
+
+;; IDO mode
+(ido-mode t)
+(ido-vertical-mode t)
+(ido-ubiquitous-mode 1)
+(setq ido-show-dot-for-dired t)
+
+(smex-initialize)
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+;; This is your old M-x.
+(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
+
+;; Yasnippets
+
+(yas-global-mode)
+(setq yas-snippet-dirs '("~/.emacs.d/yas/custom-snippets/"
+                         "~/.emacs.d/yas/yasnippet-snippets/"))
+
+;; company
+(global-company-mode)
+(define-key company-mode-map (kbd "∈") 'company-complete)
+
 (setq compilation-scroll-output t)
 (setq inhibit-splash-screen t)
 (setq-default indent-tabs-mode nil)
 (transient-mark-mode -1)
 (global-linum-mode t)
 (show-paren-mode t)
-(setq show-paren-style 'mixed)
 (setq x-select-enable-clipboard t)
 (put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+(put 'erase-buffer 'disabled nil)
 (mouse-avoidance-mode 'banish)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 (setq backup-directory-alist
       (list (cons "." (expand-file-name "backup" user-emacs-directory))))
 (tool-bar-mode -1)
 (desktop-save-mode 0)
-(put 'erase-buffer 'disabled nil)
-(put 'downcase-region 'disabled nil)
+
+
+(defvar foo "bla")

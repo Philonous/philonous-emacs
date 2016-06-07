@@ -105,9 +105,9 @@ C-u 0 M-x enumerate-rectangle"
   (let ((buffer-next-window (window-buffer (next-window))))
   (progn
     (delete-other-windows)
-    (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
+    (let* ((right-window (split-window-right -80))
            (haskell-window (split-window-below -20))
-           (middle-window (split-window-right)))
+           (middle-window (split-window-right 80)))
       (progn
         (set-window-buffer haskell-window haskell-buffer )
         (set-window-dedicated-p haskell-window t )
@@ -353,5 +353,22 @@ and the other way around otherwise"
       (fill-hyphens 80))
     (previous-line)
     ))
+
+
+(defun haskell-find-definition-at-point ()
+  (interactive)
+  (let* ((word (word-at-point))
+         (session (or (haskell-session-maybe) (error "No haskell session")))
+         (process (or (haskell-session-process session) (error "No session process")))
+         (response (haskell-process-queue-sync-request
+                    process
+                    (concat ":i " word)))
+         )
+    (if (string-match "[^-]*-- Defined at \\([^:]+\\):.*" response)
+        ;; (find-file (match-string 1 response)
+        (message response)
+        )
+      ))
+
 
 (provide 'custom-functions)

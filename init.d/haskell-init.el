@@ -1,3 +1,4 @@
+(add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/build-24.5.1")
 (add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/")
 (require 'haskell-mode-autoloads)
 (add-to-list 'Info-default-directory-list "~/.emacs.d/other-packages/haskell-mode/")
@@ -53,16 +54,17 @@
           (require 'ac-haskell-etags)
         (require 'haskell-debug)
         (require 'paredit)
-        (haskell-indentation-mode t)
         (turn-on-font-lock)
         (column-number-mode t)
+        (intero-mode t)
         (setq flymake-mode nil)
         (flyspell-prog-mode)
-        (auto-complete-mode t)
-        (setq ac-sources '(ac-source-haskell-etags
-                           ac-source-words-in-same-mode-buffers))
-        (ac-linum-workaround)
-        (setq ac-auto-start nil)
+
+        ;; (auto-complete-mode t)
+        ;; (setq ac-sources '(ac-source-haskell-etags
+        ;;                    ac-source-words-in-same-mode-buffers))
+        ;; (ac-linum-workaround)
+        ;; (setq ac-auto-start nil)
         (set (make-local-variable 'align-rules-list) nil)
         (add-to-list 'align-rules-list
                      '(haskell-types
@@ -88,10 +90,10 @@
                      '(haskell-applicative-group
                        (regexp . "\\(\\s-+\\)\\(<\\$>\\|<\\*>\\)\\s-+")
                        (modes quote (haskell-mode literate-haskell-mode))))
+        (haskell-indentation-mode t)
 
         ;; (shm)
-        (define-key ac-mode-map (kbd "<tab>") 'indent-according-to-mode)
-        (define-key haskell-mode-map (kbd "M-<tab>") 'ac-trigger-key-command)
+        (define-key haskell-mode-map (kbd "M-<tab>") 'company-complete)
         (define-key haskell-mode-map (kbd "C-c C-f") 'inferior-haskell-find-definition)
         (define-key haskell-mode-map [?\C-c ?\C-z] 'haskell-interactive-switch)
         (define-key haskell-mode-map (kbd "C-c t") 'haskell-process-do-type )
@@ -135,36 +137,8 @@
 
 (setq haskell-mode-hook 'haskell-mode-init)
 
-
 (setq haskell-interactive-mode-hook
            (lambda ()
              (define-key haskell-interactive-mode-map (kbd "M-`") 'haskell-go-to-old-window)
              (define-key haskell-interactive-mode-map (kbd "C-`") 'haskell-go-to-old-window)
              ))
-
-(custom-set-variables
- '(haskell-indentation-layout-offset 4)
- '(haskell-indentation-left-offset 4)
- '(haskell-process-args-cabal-repl nil)
- '(haskell-process-log t)
- '(haskell-process-path-cabal "/home/uart14/.cabal/bin/cabal")
- '(haskell-process-path-cabal-ghci "/home/uart14/.cabal/bin/cabal")
- '(haskell-process-suggest-overloaded-strings nil)
- '(haskell-process-suggest-remove-import-lines nil)
- '(haskell-process-suggest-restart nil)
- '(haskell-process-type (quote cabal-repl))
- '(haskell-tags-on-save t)
- '(haskell-compile-cabal-build-command "cd %s; cabal install --only-dep --enable-tests && cabal configure --enable-tests && cabal build --ghc-option=-ferror-spans")
- '(haskell-indentation-layout-offset 4)
- '(haskell-indentation-left-offset 4)
- '(haskell-process-args-cabal-repl nil ) ;; (quote ("--with-ghc=/home/uart14/projects/ghci-ng/.cabal-sandbox/bin/ghci-ng")))
- '(haskell-process-log t)
- '(haskell-process-path-cabal "/home/uart14/.cabal/bin/cabal")
- '(haskell-process-path-cabal-ghci "/home/uart14/.cabal/bin/cabal")
- '(haskell-process-suggest-overloaded-strings nil)
- '(haskell-process-suggest-remove-import-lines nil)
- '(haskell-process-suggest-restart nil)
- '(haskell-process-type (quote cabal-repl))
- '(haskell-tags-on-save t)
-
- )
