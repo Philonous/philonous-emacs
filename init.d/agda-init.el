@@ -1,1 +1,1 @@
-(require 'agda2)
+;; (require 'agda2)

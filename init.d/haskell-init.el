@@ -1,8 +1,3 @@
-
-;; (add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/build-24.5.1")
-(add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/")
-(require 'haskell-mode-autoloads)
-;; (add-to-list 'Info-default-directory-list "~/.emacs.d/other-packages/haskell-mode/")
 (require 'custom-functions)
 (require 'haskell-import)
 (require 'haskell-cabal)
@@ -27,8 +22,6 @@
   (define-key haskell-mode-map (kbd "C-c C-s") 'shm-case-split))
 
 ;; Load mode. This
-
-
 
 (defun intero-run-command (command)
   (let* ((repl-buffer (intero-repl-buffer nil)))
