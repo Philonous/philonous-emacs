@@ -1,144 +1,257 @@
-(add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/build-24.5.1")
+
+;; (add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/build-24.5.1")
 (add-to-list 'load-path "~/.emacs.d/other-packages/haskell-mode/")
 (require 'haskell-mode-autoloads)
-(add-to-list 'Info-default-directory-list "~/.emacs.d/other-packages/haskell-mode/")
+;; (add-to-list 'Info-default-directory-list "~/.emacs.d/other-packages/haskell-mode/")
 (require 'custom-functions)
 (require 'haskell-import)
 (require 'haskell-cabal)
+(require 'flycheck)
+(require 'intero)
+
 
 (setq auto-mode-alist (cons '("\\.hs$" . haskell-mode) auto-mode-alist))
 
 (defun haskell-process-restart-and-load-file ()
-  "Restart the haskell process and load the file visited by buffer"
+  "Restart the haskell process and load the file visited by buffer."
   (interactive)
   (progn (haskell-process-restart)
          (haskell-process-load-file)))
 
 (defun shm ()
-  "start structures haskell mode"
+  "Start structures haskell mode."
   (interactive)
   (require 'shm)
   (structured-haskell-mode t)
   (require 'shm-case-split)
   (define-key haskell-mode-map (kbd "C-c C-s") 'shm-case-split))
 
+;; Load mode. This
+
+
+
+(defun intero-run-command (command)
+  (let* ((repl-buffer (intero-repl-buffer nil)))
+    (with-current-buffer repl-buffer
+      (comint-simple-send
+       (get-buffer-process (current-buffer))
+       command
+       ))))
+
+(defun haskell-load-file ()
+  (cond
+   ((boundp 'intero-mode) (save-window-excursion (intero-repl-load)))
+   ((boundp 'haskell-interactive-mode) (haskell-process-load-file))))
+
+(defun haskell-run-command (command)
+  (cond
+   ((boundp 'intero-mode)  (intero-run-command command))
+   ((boundp  'haskell-interactive-mode) (haskell-process-show-repl-response command))
+   ))
+
+
 (defun haskell-process-set-load-mode (mode)
-  "set the ghci load mode (bytecode, object code, no code)"
-  (haskell-process-show-repl-response (concat ":set -f" mode "-code")))
+  "Set the ghci load mode to MODE (bytecode, object code, no code)."
+  (haskell-run-command (concat ":set -f" mode "-code")))
 
 (defun haskell-process-set-load-byte-code ()
-  "Set the haskell process to compile to byte code"
+  "Set the haskell process to compile to byte code."
   (interactive)
   (haskell-process-set-load-mode "byte"))
 
 (defun haskell-process-set-load-no-code ()
-  "Set the haskell process to compile to byte code"
+  "Set the haskell process to compile to byte code."
   (interactive)
   (haskell-process-set-load-mode "no"))
 
 (defun haskell-process-set-load-object-code ()
-  "Set the haskell process to compile to byte code"
+  "Set the haskell process to compile to byte code."
   (interactive)
   (haskell-process-set-load-mode "object"))
 
 (defun haskell-process-reload-with-object-code ()
-  "Reload current file with -f-object-code and reset to byte code"
+  "Reload current file with -f-object-code and reset to byte code."
   (interactive)
   (haskell-process-set-load-object-code)
-  (haskell-process-load-file)
+  (haskell-load-file)
   (haskell-process-set-load-byte-code)
-  (haskell-clear-interactive-window)
-  (haskell-process-load-file))
+  ;; (haskell-clear-interactive-window)
+  (haskell-load-file))
+
+(defun haskell-process-for-tests ()
+  "Load packages and set source path for tests."
+  (interactive)
+  (haskell-process-load-buffer-packages)
+  (haskell-process-show-repl-response ":set -isrc:tests")
+  (haskell-process-load-file)
+)
+
+(defvar with-intero-mode t)
+
+;; (setf (flycheck-checker-get 'intero 'next-checkers) nil)
+
+;;; Run hlint after intero, but only if intero didn't report anything more
+;;; severe than warnings
+;; (flycheck-add-next-checker 'intero '(warning . haskell-hlint))
+
+(defun intero-mode-init ()
+  "Initialization for Intero mode."
+  (require 'intero)
+  ;; (set (make-local-variable 'intero-mode) t) ;; Hack to make flycheck
+  ;; happy
+  (intero-mode t)
+  (require 'company)
+  (set (make-local-variable 'company-backends)
+       '(( company-intero
+           company-capf
+           company-dabbrev-code
+           )
+         company-files
+         ))
+  (company-mode nil)
+  (setq flycheck-checker nil)
+  (define-key intero-mode-map (kbd "C-c C-t") 'intero-type-at)
+  (define-key intero-mode-map (kbd "C-c t") 'intero-type-at)
+  (define-key intero-mode-map (kbd "C-c C-i") 'intero-info)
+  (define-key intero-mode-map (kbd "M-.") 'intero-goto-definition)
+  (define-key intero-mode-map (kbd "C-c C-l") (lambda () (interactive) (save-window-excursion
+                                                                         (haskell-process-save-current-window)
+                                                                         (haskell-clear-interactive-window)
+                                                                         (haskell-load-file))))
+  (define-key intero-mode-map (kbd "C-c C-c") '(lambda () (interactive (flycheck-buffer)
+                                                                       (flycheck-list-errors)
+                                                                       )))
+  (define-key haskell-mode-map (kbd "M-`") nil)
+  (define-key intero-mode-map (kbd "C-c C-r") 'intero-apply-suggestions)
+  (define-key intero-mode-map (kbd "C-c C-e") 'intero-expand-splice-at-point)
+  (define-key intero-mode-map (kbd "M-g M-n") 'flycheck-next-error)
+  (define-key intero-mode-map (kbd "C-c r") 'intero-restart)
+  )
 
 (defun haskell-mode-init ()
-          (require 'ac-haskell-etags)
-        (require 'haskell-debug)
-        (require 'paredit)
-        (turn-on-font-lock)
-        (column-number-mode t)
-        (intero-mode t)
-        (setq flymake-mode nil)
-        (flyspell-prog-mode)
+  "Custom initialization function for Haskell mode."
+  ;; (require 'ac-haskell-etags)
+  ;; (require 'haskell-debug)
+  ;; (require 'paredit)
+  ;; (require 'intero)
+  (turn-on-font-lock)
+  (column-number-mode t)
+  (subword-mode t)
+  ;; (setq flymake-mode nil)
+  ;; (flyspell-prog-mode)
+  (intero-mode-init)
+  (require 'smartparens)
+  (smartparens-mode t)
+  ;; (add-to-list 'flycheck-disabled-checkers 'haskell-ghc)
+  ;; (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
+  (sp-with-modes '(haskell-mode haskell-interactive-mode)
+    (sp-local-pair "{-#" "#-}")
+    (sp-local-pair "'" nil :actions nil)
+    (sp-local-pair "\\(" nil :actions nil))
 
-        ;; (auto-complete-mode t)
-        ;; (setq ac-sources '(ac-source-haskell-etags
-        ;;                    ac-source-words-in-same-mode-buffers))
-        ;; (ac-linum-workaround)
-        ;; (setq ac-auto-start nil)
-        (set (make-local-variable 'align-rules-list) nil)
-        (add-to-list 'align-rules-list
-                     '(haskell-types
-                       (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
-                       (modes quote (haskell-mode literate-haskell-mode))))
-        (add-to-list 'align-rules-list
-                     '(haskell-assignment
-                       (regexp . "\\(\\s-+\\)=\\s-+")
-                       (modes quote (haskell-mode literate-haskell-mode))))
-        (add-to-list 'align-rules-list
-                     '(haskell-arrows
-               (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
-               (modes quote (haskell-mode literate-haskell-mode))))
-        (add-to-list 'align-rules-list
-                     '(haskell-left-arrows
-                       (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
-                       (modes quote (haskell-mode literate-haskell-mode))))
-        (add-to-list 'align-rules-list
-                     '(haskell-constituent-group
-                       (regexp . "\\(\\s-+\\)\\(\\[\\|{\\|(\\|,\\)\\s-+")
-                       (modes quote (haskell-mode literate-haskell-mode))))
-        (add-to-list 'align-rules-list
-                     '(haskell-applicative-group
-                       (regexp . "\\(\\s-+\\)\\(<\\$>\\|<\\*>\\)\\s-+")
-                       (modes quote (haskell-mode literate-haskell-mode))))
-        (haskell-indentation-mode t)
+  ;; (interactive-haskell-mode)
 
-        ;; (shm)
-        (define-key haskell-mode-map (kbd "M-<tab>") 'company-complete)
-        (define-key haskell-mode-map (kbd "C-c C-f") 'inferior-haskell-find-definition)
-        (define-key haskell-mode-map [?\C-c ?\C-z] 'haskell-interactive-switch)
-        (define-key haskell-mode-map (kbd "C-c t") 'haskell-process-do-type )
-        (define-key haskell-mode-map (kbd "C-c C-l") (lambda () (interactive)
-                                                       (haskell-clear-interactive-window)
-                                                       (haskell-process-load-file)))
+  (hindent-mode t)
 
-        (define-key haskell-mode-map (kbd "C-c C-d") 'haskell-mode-save-buffer-and-tags)
-        (define-key haskell-mode-map (kbd "C-`") 'haskell-go-to-haskell-window)
-        (define-key haskell-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
-        (define-key haskell-mode-map (kbd "<f11>") 'layout-for-haskell2)
-        (define-key haskell-mode-map (kbd "<f8>") 'haskell-navigate-imports)
-        (define-key haskell-mode-map (kbd "<backspace>") 'backward-delete-char)
-        (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-clear-interactive-window)
-        (define-key haskell-mode-map (kbd "C-c r") 'haskell-process-restart-and-load-file)
-        (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
-        (define-key haskell-mode-map (kbd "C-c p") 'check-parens)
-        (define-key haskell-mode-map (kbd "C-c l") 'send-text-to-haskell-process)
-        (define-key haskell-mode-map (kbd "C-c C-x C-t") 'haskell-session-change-target)
-        (define-key haskell-mode-map (kbd "C-c i") 'haskell-import-lines)
-        (define-key haskell-mode-map (kbd "M-.")   'haskell-mode-tag-find)
-        (define-key haskell-mode-map (kbd "C-M-.") 'haskell-mode-jump-to-def-or-tag)
-        (define-key haskell-mode-map (kbd "M-]")   'align)
-        (define-key haskell-mode-map (kbd "C-c g") 'haskell-rgrep)
-        (define-key haskell-mode-map (kbd "C-c C-q") 'haskell-qualify-import-line)
-        (define-key haskell-mode-map (kbd "C-c k") 'swap-underscore-camelcase)
-        (define-key haskell-mode-map (kbd "C-<right>") 'paredit-forward-slurp-sexp)
-        (define-key haskell-mode-map (kbd "C-c d") 'haskell-cabal-add-dependency)
-        (define-key haskell-mode-map (kbd "M-n") 'forward-paragraph)
-        (define-key haskell-mode-map (kbd "M-p") 'backward-paragraph)
-        (define-key haskell-debug-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
-        (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-mode-show-type-at)
-        (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
-        (define-key haskell-mode-map (kbd "C-c h") 'section-heading)
-        (define-key haskell-mode-map (kbd "C-c C-x o") 'haskell-process-set-load-object-code)
-        (define-key haskell-mode-map (kbd "C-c C-x b") 'haskell-process-set-load-byte-code)
-        (define-key haskell-mode-map (kbd "C-c C-x n") 'haskell-process-set-load-no-code)
-        (define-key haskell-mode-map (kbd "C-c C-s") 'haskell-process-reload-with-object-code)
-        (define-key haskell-mode-map (kbd "<delete>") 'delete-char)
-        )
+  (set (make-local-variable 'align-rules-list) nil)
+  (add-to-list 'align-rules-list
+               '(haskell-types
+                 (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-assignment
+                 (regexp . "\\(\\s-+\\)=\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-arrows
+                 (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-left-arrows
+                 (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-constituent-group
+                 (regexp . "\\(\\s-+\\)\\(\\[\\|{\\|(\\|,\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-applicative-group
+                 (regexp . "\\(\\s-+\\)\\(<\\$>\\|<\\*>\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (haskell-indentation-mode t)
 
-(setq haskell-mode-hook 'haskell-mode-init)
+  ;; (shm)
+  (define-key haskell-mode-map (kbd "M-<tab>") 'company-complete)
+  (define-key haskell-mode-map (kbd "C-c C-f") 'inferior-haskell-find-definition)
+  (define-key haskell-mode-map [?\C-c ?\C-z] 'haskell-interactive-switch)
+  (define-key haskell-mode-map (kbd "C-c t") 'haskell-process-do-type )
+  (define-key haskell-mode-map (kbd "C-c C-l") (lambda () (interactive)
+                                                 (haskell-clear-interactive-window)
+                                                 (haskell-process-load-file)))
+
+  (define-key haskell-mode-map (kbd "C-c C-d") 'haskell-mode-save-buffer-and-tags)
+  (define-key haskell-mode-map (kbd "C-`") 'haskell-go-to-haskell-window)
+  (define-key haskell-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
+  (define-key haskell-mode-map (kbd "<f11>") 'layout-for-haskell2)
+  (define-key haskell-mode-map (kbd "<f8>") 'haskell-navigate-imports)
+  (define-key haskell-mode-map (kbd "<backspace>") 'backward-delete-char)
+  (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-clear-interactive-window)
+  (define-key haskell-mode-map (kbd "C-c r") 'haskell-process-restart-and-load-file)
+  (define-key haskell-mode-map (kbd "C-c C-r") 'haskell-process-for-tests)
+  (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
+  (define-key haskell-mode-map (kbd "C-c l") 'send-text-to-haskell-process)
+  (define-key haskell-mode-map (kbd "C-c C-x C-t") 'haskell-session-change-target)
+  (define-key haskell-mode-map (kbd "C-c i") 'haskell-import-lines)
+  (define-key haskell-mode-map (kbd "C-c C-.") (lambda () (interactive)
+                                                 (haskell-align-imports)
+                                                 (haskell-sort-imports)
+                                                 ))
+  (define-key haskell-mode-map (kbd "M-.")  'haskell-mode-jump-to-def-or-tag)
+  (define-key haskell-mode-map (kbd "C-M-.")   'haskell-tag-find)
+  ;; (define-key haskell-mode-map (kbd "C-M-.") 'haskell-mode-jump-to-def-or-tag)
+  (define-key haskell-mode-map (kbd "M-]")   'align)
+  (define-key haskell-mode-map (kbd "C-c g") 'haskell-rgrep)
+  (define-key haskell-mode-map (kbd "C-c C-q") 'haskell-qualify-import-line)
+  (define-key haskell-mode-map (kbd "C-c k") 'swap-underscore-camelcase)
+  (define-key haskell-mode-map (kbd "C-c d") 'haskell-cabal-add-dependency)
+  (define-key haskell-mode-map (kbd "M-n") 'forward-paragraph)
+  (define-key haskell-mode-map (kbd "M-p") 'backward-paragraph)
+  (define-key haskell-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
+  (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-mode-show-type-at)
+  (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
+  (define-key haskell-mode-map (kbd "C-c h") 'section-heading)
+  (define-key haskell-mode-map (kbd "C-c C-x o") 'haskell-process-set-load-object-code)
+  (define-key haskell-mode-map (kbd "C-c C-x b") 'haskell-process-set-load-byte-code)
+  (define-key haskell-mode-map (kbd "C-c C-x n") 'haskell-process-set-load-no-code)
+  (define-key haskell-mode-map (kbd "C-c C-s") 'haskell-process-reload-with-object-code)
+  (define-key haskell-mode-map (kbd "C-c n") 'flycheck-next-error)
+  (define-key haskell-mode-map (kbd "C-c C-d") 'duplicate-line-or-region)
+  (define-key haskell-mode-map (kbd "<delete>") 'delete-char)
+
+
+  (define-key haskell-mode-map (kbd "C-c e") (lambda () (interactive)
+                                               (if flycheck-current-errors
+                                                   (flycheck-list-errors))
+                                               (message "No errors.")
+                                               ))
+
+  ;; (define-key intero-mode-map (kbd "C-c C-l") nil)
+
+  ;;Intero
+
+  ;; (intero-mode t)
+  )
+
+(setq haskell-mode-hook #'haskell-mode-init)
 
 (setq haskell-interactive-mode-hook
            (lambda ()
              (define-key haskell-interactive-mode-map (kbd "M-`") 'haskell-go-to-old-window)
              (define-key haskell-interactive-mode-map (kbd "C-`") 'haskell-go-to-old-window)
              ))
+
+(defun intero-repl-mode-init ()
+  (interactive)
+  (define-key intero-repl-mode-map (kbd "M-`") 'haskell-go-to-old-window))
+
+(add-hook 'intero-repl-mode-hook #'intero-repl-mode-init)

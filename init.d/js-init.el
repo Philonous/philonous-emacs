@@ -1,4 +1,5 @@
 (require 'compile)
+(require 'subr-x)
 
 (add-to-list 'compilation-error-regexp-alist-alist
              '(eslint "^\\(\w+\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3))
@@ -62,13 +63,44 @@
   ;;                      "*npm start*"
   ;;                      ))
 
-(add-hook 'js3-mode-hook
+
+(defun node-load ()
+  (interactive)
+  (let* ((file buffer-file-name))
+       (unless buffer-file-name (error "Buffer is not visiting a file"))
+       (nodejs-repl-load-file file)))
+
+(defun get-npm-bin-dir ()
+  "Get project node bin directory"
+  (string-trim (shell-command-to-string "npm bin"))
+  )
+
+(defun get-tern-command ()
+  (let* ((node-bin (get-npm-bin-dir))
+         (tern-bin (concat (file-name-as-directory node-bin) "tern")))
+    tern-bin))
+
+(setq js2-mode-hook
           (lambda ()
+            ;; (smartparens-mode t)
             (setq compilation-read-command nil)
-            (set (make-local-variable 'compile-command)
-                 (compile-javascript))
-            (define-key js3-mode-map (kbd "C-c C-c") 'compile)
-            (define-key js3-mode-map (kbd "C-C C-n") 'next-error)
-            (define-key js3-mode-map (kbd "C-c C-p") 'previous-error)
-            (define-key js3-mode-map (kbd "C-c C-r") 'npm-start)
+            (set (make-local-variable 'compile-command) "npm run build")
+            (define-key js2-mode-map (kbd "C-c C-c") 'compile)
+            (define-key js2-mode-map (kbd "C-C C-n") 'next-error)
+            (define-key js2-mode-map (kbd "C-c C-p") 'previous-error)
+            (define-key js2-mode-map (kbd "C-c C-r") 'npm-start)
+            (define-key js2-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
+            ;; (set (make-local-variable 'tern-command) (list (get-tern-command)))
+            ;; (setq 'tern-command )
+            (flycheck-mode 1)
+            (smartparens-strict-mode 1)
             ))
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
+
+(defun rjsx-mode-init ()
+  (define-key rjsx-mode-map "<" #'self-insert-command)
+  )
+
+(add-hook 'rjsx-mode-hook #'rjsx-mode-init)

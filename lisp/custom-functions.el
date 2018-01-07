@@ -89,12 +89,16 @@ C-u 0 M-x enumerate-rectangle"
                        (search-forward (char-to-string char) nil nil arg)
                      (backward-char direction))
                    (point)))))
+;; Haskell
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun get-haskell-buffer ()
   (save-window-excursion
-    (let ((sess (haskell-session)))
-       (if sess (haskell-session-interactive-buffer sess)
-                nil))))
+    (if (bound-and-true-p intero-mode)
+        (intero-repl-buffer nil t)
+      (let ((sess (haskell-session)))
+        (if sess (haskell-session-interactive-buffer sess)
+          nil)))))
 
 (defun layout-for-haskell ()
   (interactive)
@@ -114,28 +118,57 @@ C-u 0 M-x enumerate-rectangle"
         (set-window-parameter haskell-window 'no-other-window t)
         (set-window-buffer right-window buffer-next-window )))))))))
 
+(defun split-windows-threeway ()
+    (interactive)
+    (let ((buffer-next-window (window-buffer (next-window)))
+          (buffer-previous-window (window-buffer (previous-window)))
+          )
+      (progn
+        (delete-other-windows)
+        (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
+               (middle-window (split-window-right)))
+          (set-window-buffer (selected-window) buffer-previous-window)
+          (set-window-buffer right-window buffer-next-window)
+          (select-window middle-window)
+          ))))
+
 (defun layout-for-haskell2 ()
   (interactive)
   (save-selected-window
-  (let ((haskell-buffer (get-haskell-buffer)))
-  (progn
-  (mapc 'delete-window (get-buffer-window-list haskell-buffer))
-  (let ((buffer-next-window (window-buffer (next-window))))
-  (progn
-    (delete-other-windows)
-    (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
-           (middle-window (split-window-right))
-           (haskell-window (split-window-below -20))
-           (compile-window (with-selected-window right-window
-                             (split-window-below -20))))
+    (let ((haskell-buffer (get-haskell-buffer)))
       (progn
-        (set-window-buffer haskell-window haskell-buffer )
-        (set-window-dedicated-p haskell-window t )
-        (with-selected-window compile-window
-          (switch-to-buffer "*haskell-compilation*")
-          (set-window-dedicated-p compile-window t ))
-        (set-window-parameter haskell-window 'no-other-window t)
-        (set-window-buffer right-window buffer-next-window )))))))))
+        (mapc 'delete-window (get-buffer-window-list haskell-buffer))
+        (let ((buffer-next-window (window-buffer (next-window))))
+          (progn
+            (delete-other-windows)
+            (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
+                   (middle-window (split-window-right))
+                   (haskell-window (split-window-below -20))
+                   (compile-window (with-selected-window right-window
+                                     (split-window-below -20))))
+              (progn
+                (set-window-buffer haskell-window haskell-buffer )
+                (set-window-dedicated-p haskell-window t )
+                (with-selected-window compile-window
+                  (switch-to-buffer "*haskell-compilation*")
+                  (set-window-dedicated-p compile-window t ))
+                (set-window-parameter haskell-window 'no-other-window t)
+                (set-window-buffer right-window buffer-next-window )))))))))
+
+(defun haskell-tag-find (ident &optional next-p)
+  "Jump to tag"
+  (interactive "MIdentifier to jump to: ")
+  (let ((tags-file-dir (haskell-cabal--find-tags-dir))
+        (tags-revert-without-query t))
+    (when (and ident
+               (not (string= "" (haskell-string-trim ident)))
+               tags-file-dir)
+      (let ((tags-file-name (concat tags-file-dir "TAGS")))
+        (cond ((file-exists-p tags-file-name)
+               (let ((xref-prompt-for-identifier next-p))
+                 (xref-find-definitions ident)))
+              (t (haskell-mode-generate-tags ident)))))))
+
 
 ;; (defun layout-for-haskell ()
 ;;   (interactive)
@@ -156,29 +189,32 @@ C-u 0 M-x enumerate-rectangle"
 
 (defvar haskell-process-old-window nil)
 
+(defun haskell-process-save-current-window ()
+  (setq haskell-process-old-window (selected-window)))
+
 (defun haskell-go-to-haskell-window ()
   (interactive)
-  (let ((sess (haskell-session)))
-    (if sess
-       (let* ((haskell-buffer (haskell-session-interactive-buffer sess))
-              (haskell-window (get-buffer-window haskell-buffer)))
-          (if haskell-window (progn (setq haskell-process-old-window (selected-window))
-                                    (select-window haskell-window)
-
-                                    ))))))
+  (let* ((haskell-buffer (get-haskell-buffer))
+         (haskell-window (get-buffer-window haskell-buffer)))
+    (if haskell-window (progn (haskell-process-save-current-window)
+                              (select-window haskell-window)))))
 
 (defun haskell-go-to-old-window ()
   (interactive)
   (if haskell-process-old-window
       (select-window haskell-process-old-window)))
 
+(defun haskell-repl-clear-buffer ()
+  (interactive)
+  (cond
+   ((string= major-mode "intero-repl-mode") (intero-repl-clear-buffer))
+   ((string= major-mode "haskell-interactive-mode") (haskell-interactive-mode-clear))))
+
 (defun haskell-clear-interactive-window ()
   (interactive)
-  (let ((sess (haskell-session)))
-    (if sess
-       (let ((haskell-buffer (haskell-session-interactive-buffer sess)))
-         (if haskell-buffer (with-current-buffer haskell-buffer
-                              (haskell-interactive-mode-clear)))))))
+  (let* ((haskell-buffer (get-haskell-buffer)))
+    (if haskell-buffer (with-current-buffer haskell-buffer
+                         (haskell-repl-clear-buffer)))))
 
 (defun haskell-clear-process-log ()
   (interactive)
@@ -187,9 +223,9 @@ C-u 0 M-x enumerate-rectangle"
                        (let ((inhibit-read-only t))
                          (erase-buffer))))))
 
-(defadvice haskell-interactive-mode-reset-error (after clear-process-log activate)
-  "clear the haskell process log when resetting errors"
-  (haskell-clear-process-log))
+;; (defadvice haskell-interactive-mode-reset-error (after clear-process-log activate)
+;;   "clear the haskell process log when resetting errors"
+;;   (haskell-clear-process-log))
 
 (defun send-text-to-haskell-process ()
   "Send the current line to the haskell process."
@@ -315,6 +351,19 @@ and the other way around otherwise"
                        next))))))
 
 
+(defun decap (str)
+  "Transform the first letter of STR to lower case"
+  (if (< (length str) 1)
+      ""
+    (concat (downcase (substring str 0 1)) (substring str 1))))
+
+(defun cap (str)
+  "Transform the first letter of STR to lower case"
+  (if (< (length str) 1)
+      ""
+    (concat (upcase (substring str 0 1)) (substring str 1))))
+
+
 (defun byte-compile-reload-dir ()
   "Byte-compile and reload everything."
   (interactive)
@@ -370,5 +419,45 @@ and the other way around otherwise"
         )
       ))
 
+
+(defun comint-clear-interactive-buffer ()
+  "Clear the interactive window"
+  (interactive)
+  (require 'comint)
+  (delete-region (point-min) (point-max))
+  (comint-send-input)
+  )
+
+(defun switch-to-previous-buffer ()
+  "Switch to previously open buffer.
+Repeated invocations toggle between the two most recently open buffers."
+  (interactive)
+  (switch-to-buffer (other-buffer (current-buffer) 1)))
+
+(defun duplicate-region ()
+  (interactive)
+  (let* ((region-text (buffer-substring (region-beginning) (region-end))))
+    (goto-char (region-end))
+    (unless (= (point) (line-beginning-position)) (insert "\n"))
+    (save-excursion
+      (insert region-text))))
+
+(defun duplicate-line ()
+  (interactive)
+  (save-excursion  (let* ((line (buffer-substring (line-beginning-position) (line-end-position))))
+                     (end-of-line)
+                     (insert "\n")
+                     (insert line)
+                     ))
+  (next-line)
+  )
+
+(defun duplicate-line-or-region ()
+  (interactive)
+  (if (region-active-p) (duplicate-region) (duplicate-line)))
+
+(defun open-with (program)
+  (interactive "MProgram: ")
+  (call-process program nil nil nil buffer-file-name))
 
 (provide 'custom-functions)

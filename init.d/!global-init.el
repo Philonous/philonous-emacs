@@ -22,35 +22,48 @@
 (global-set-key (kbd "M-e") 'er/expand-region)
 (global-set-key (kbd "M-z") 'zap-up-to-char)
 (global-set-key (kbd "C-c s") 'flysspell-region-or-buffer)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
+(global-set-key (kbd "C-x C-b") 'switch-to-previous-buffer)
 (global-set-key (kbd "C-x C-m") 'make-frame)
 (global-set-key (kbd "C-c C-p") 'close-open-paren)
 (global-set-key (kbd "C-x g") 'magit-status)
 (global-set-key (kbd "C-c b") 'magit-blame-mode)
+(global-set-key (kbd "<f11>") 'split-windows-threeway)
+(global-set-key (kbd "C-c p") 'check-parens)
+(global-set-key (kbd "C-c d") 'duplicate-line-or-region)
 
-(add-to-list 'default-frame-alist '(font . "Anonymous Pro-9"))
+(add-to-list 'default-frame-alist '(font . "Inconsolata-11"))
 
 ;; IDO mode
 (ido-mode t)
 (ido-vertical-mode t)
-(ido-ubiquitous-mode 1)
+(flx-ido-mode t)
+(ido-ubiquitous-mode t)
+(setq ido-use-faces nil)
 (setq ido-show-dot-for-dired t)
+(setq ido-vertical-define-keys 'C-n-C-p-up-down-left-right)
+(setq ido-default-buffer-method 'samewindow)
+(setq ido-default-file-method 'selected-window)
+(setq ido-auto-merge-work-directories-length -1)
 
-(smex-initialize)
-(global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+
+;; (smex-initialize)
+;; (global-set-key (kbd "M-x") 'smex)
+;; (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 ;; This is your old M-x.
 (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
 
 ;; Yasnippets
 
-(yas-global-mode)
 (setq yas-snippet-dirs '("~/.emacs.d/yas/custom-snippets/"
                          "~/.emacs.d/yas/yasnippet-snippets/"))
+(yas-global-mode)
 
 ;; company
 (global-company-mode)
 (define-key company-mode-map (kbd "∈") 'company-complete)
+
+; various
+(global-hl-line-mode t)
 
 (setq compilation-scroll-output t)
 (setq inhibit-splash-screen t)

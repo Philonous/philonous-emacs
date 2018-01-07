@@ -1,8 +1,11 @@
-(defvar module-abbrevs
+(defcustom haskell-import-module-abbrevs
   nil
-  "List of module abbreviatios" )
+  "List of module abbreviations"
+  :group 'haskell
+  :type '(cons string (cons string (plist symbol string)))
+  )
 
-(setq module-abbrevs '(("Text" "Data.Text (Text)"
+(setq haskell-import-module-abbrevs '(("Text" "Data.Text (Text)"
                                "qualified Data.Text as Text"
                                :language "OverloadedStrings")
                        ("Encoding" "qualified Data.Text.Encoding as Text")
@@ -22,12 +25,13 @@
                        ("BSL"  "qualified Data.ByteString.Lazy as BSL")
                        ("BSL8"  "qualified Data.ByteString.Lazy.Char8 as BSL")
                        ("Concurrent" "Control.Concurrent")
+                       ("Async" "qualified Control.Concurrent.Async as Async")
                        ("STM" "Control.Concurrent.STM")
                        ("Xmpp" "qualified Network.Xmpp as Xmpp")
                        ("XML" "qualified Data.XML.Types as XML"
                               "Data.XML.Pickle"
                               :language "OverloadedStrings")
-                       ("Ex" "qualified Control.Exception as Ex")
+                       ("Ex" "qualified Control.Monad.Catch as Ex")
                        ("Monoid" "Data.Monoid")
                        ("Function" "Data.Function")
                        ("Foldable" "qualified Data.Foldable as Foldable")
@@ -36,6 +40,7 @@
                        ("Char" "Data.Char")
                        ("List" "qualified Data.List as List")
                        ("Lens" "Control.Lens")
+                       ("Logger" "Control.Monad.Logger")
                        ("Trans" "Control.Monad.Trans")
                        ("liftIO" "Control.Monad.Trans")
                        ("Reader" "Control.Monad.Reader")
@@ -53,6 +58,7 @@
                        ("Data" "Data.Data")
                        ("Typeable" "Data.Typeable")
                        ("Base64" "qualified Data.ByteString.Base64 as Base64")
+                       ("Warp" "qualified Network.Wai.Handler.Warp as Warp")
                        ("DataTypeable"
                           "Data.Typeable" "Data.Data"
                           :language "DeriveDataTypeable")
@@ -99,7 +105,7 @@
           (progn (string-match "\\(?:[ ]*qualified[ ]\\)?[ ]*\\([^ ]*\\)[ ]*"
                                input)
                  (match-string 1 input)))
-         (expansion (assoc content module-abbrevs)))
+         (expansion (assoc content haskell-import-module-abbrevs)))
     (if expansion
         (exit-minibuffer)
         (beep))))
@@ -116,7 +122,7 @@
   "Add an import line to the current buffer.
 
    import-line can be an abbreviation defined in the
-   module-abbrevs variable. If this is the case, all the elements
+   haskell-import-module-abbrevs variable. If this is the case, all the elements
    in the matching entry are inserted (no further expansion
    is performed)
 
@@ -133,7 +139,7 @@
     (let* ((force-abbrev (string= (substring import-line 0 1) "!"))
            (import (if force-abbrev (substring import-line 1) import-line))
            (args ( ) )
-           (args (or (cdr (assoc import module-abbrevs))
+           (args (or (cdr (assoc import haskell-import-module-abbrevs))
                       (when force-abbrev
                         (error "Module abbreviation \"%s\" not found" import))
                       (list import)))

@@ -1,5 +1,5 @@
-(defun haskell-mode-init ()
+(defun elisp-mode-init ()
   (paredit-mode 1)
   )
 
-(setq emacs-lisp-mode-hook 'haskell-mode-init)
+(setq emacs-lisp-mode-hook 'elisp-mode-init)
