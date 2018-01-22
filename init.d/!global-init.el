@@ -81,6 +81,3 @@
       (list (cons "." (expand-file-name "backup" user-emacs-directory))))
 (tool-bar-mode -1)
 (desktop-save-mode 0)
-
-
-(defvar foo "bla")
