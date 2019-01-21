@@ -1,9 +1,7 @@
 ;; packages
 
 ;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
+;; installed packages.  Don't delete this line.
 (package-initialize)
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
@@ -21,23 +19,26 @@
 
 (add-hook
  'after-init-hook
- #'(lambda ()
-     (load-theme 'zenburn)
+ (lambda ()
+   ;; load path
+   (add-to-list 'load-path "~/.emacs.d/lisp")
+   (add-to-list 'load-path "~/.emacs.d/init.d")
+   (add-to-list 'load-path "~/.emacs.d/custom-packages")
+   ;; (add-to-list 'load-path "~/.emacs.d/other-packages")
+   (require 'custom-functions)
+   (add-subdirs-to-load-path "~/.emacs.d/custom-packages")
+   ;; (add-subdirs-to-load-path "~/.emacs.d/other-packages")
 
-     ;; load path
-     (add-to-list 'load-path "~/.emacs.d/lisp")
-     (add-to-list 'load-path "~/.emacs.d/init.d")
-     (add-to-list 'load-path "~/.emacs.d/custom-packages")
-     ;; (add-to-list 'load-path "~/.emacs.d/other-packages")
-     (require 'custom-functions)
-     (add-subdirs-to-load-path "~/.emacs.d/custom-packages")
-     ;; (add-subdirs-to-load-path "~/.emacs.d/other-packages")
+   ;; initialize use-package
+   (eval-when-compile (require 'use-package))
+   (setq use-package-always-ensure t)
 
-     ;; Load every *.el file in init.d in lexicographical order
-     (load-inits)
+   ;; Load every *.el file in init.d in lexicographical order
+   (load-inits)
 
-     )) ;; after-init-hook
+   )) ;; after-init-hook
 
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
+(put 'dired-find-alternate-file 'disabled nil)

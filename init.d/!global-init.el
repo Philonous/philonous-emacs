@@ -1,6 +1,13 @@
 (require 'tramp)
 (require 'mon-rectangle-utils)
 
+(use-package zenburn-theme
+  :config
+  (load-theme 'zenburn t))
+
+(add-to-list 'default-frame-alist '(font . "Inconsolata-12"))
+;; (add-to-list 'default-frame-alist '(font . "Fira Code-12"))
+
 ;; key bindings
 (global-set-key (kbd "C-c <f5>") 'buffer-menu)
 (global-set-key (kbd "C-<tab>") 'other-window)
@@ -25,45 +32,72 @@
 (global-set-key (kbd "C-x C-b") 'switch-to-previous-buffer)
 (global-set-key (kbd "C-x C-m") 'make-frame)
 (global-set-key (kbd "C-c C-p") 'close-open-paren)
-(global-set-key (kbd "C-x g") 'magit-status)
-(global-set-key (kbd "C-c b") 'magit-blame-mode)
 (global-set-key (kbd "<f11>") 'split-windows-threeway)
 (global-set-key (kbd "C-c p") 'check-parens)
 (global-set-key (kbd "C-c d") 'duplicate-line-or-region)
 
-(add-to-list 'default-frame-alist '(font . "Inconsolata-11"))
+;; Automatically sets up magit-file-mode which sets C-x g etc
+(use-package magit
+  :bind ("C-x g" . magit-status)
+  )
+
+(use-package gitignore-mode)
+
+
+(use-package ido
+  :init
+  (setq ido-use-faces nil)
+  (setq ido-show-dot-for-dired t)
+  (setq ido-default-buffer-method 'samewindow)
+  (setq ido-default-file-method 'selected-window)
+  (setq ido-auto-merge-work-directories-length -1)
+  :config
+  (ido-mode t))
+
+(use-package flx-ido
+  :config
+  (flx-ido-mode t)
+  )
+(use-package ido-completing-read+
+  :config
+  (ido-ubiquitous-mode t))
+
+(use-package ido-vertical-mode
+  :init
+  (setq ido-vertical-define-keys 'C-n-C-p-up-down-left-right)
+  :config
+  (ido-vertical-mode t))
 
 ;; IDO mode
-(ido-mode t)
-(ido-vertical-mode t)
-(flx-ido-mode t)
-(ido-ubiquitous-mode t)
-(setq ido-use-faces nil)
-(setq ido-show-dot-for-dired t)
-(setq ido-vertical-define-keys 'C-n-C-p-up-down-left-right)
-(setq ido-default-buffer-method 'samewindow)
-(setq ido-default-file-method 'selected-window)
-(setq ido-auto-merge-work-directories-length -1)
-
 
 ;; (smex-initialize)
 ;; (global-set-key (kbd "M-x") 'smex)
 ;; (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 ;; This is your old M-x.
-(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
 
 ;; Yasnippets
 
-(setq yas-snippet-dirs '("~/.emacs.d/yas/custom-snippets/"
-                         "~/.emacs.d/yas/yasnippet-snippets/"))
-(yas-global-mode)
+(use-package yasnippet
+  :init
+  (setq yas-snippet-dirs '("~/.emacs.d/yas/custom-snippets/"
+                           "~/.emacs.d/yas/yasnippet-snippets/")))
 
 ;; company
-(global-company-mode)
-(define-key company-mode-map (kbd "∈") 'company-complete)
+
+(use-package company
+  :bind ("∈" . 'company-complete)
+  :config
+  (global-company-mode))
+
+;; which-keys
+
+(use-package which-key)
 
 ; various
+
+(global-visual-line-mode t)
 (global-hl-line-mode t)
+
 
 (setq compilation-scroll-output t)
 (setq inhibit-splash-screen t)
@@ -81,3 +115,5 @@
       (list (cons "." (expand-file-name "backup" user-emacs-directory))))
 (tool-bar-mode -1)
 (desktop-save-mode 0)
+
+(use-package multiple-cursors)

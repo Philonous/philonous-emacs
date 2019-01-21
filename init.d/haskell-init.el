@@ -4,6 +4,10 @@
 (require 'flycheck)
 (require 'intero)
 
+(;; require 'intero-debug)
+
+(use-package intero)
+(use-package haskell-mode)
 
 (setq auto-mode-alist (cons '("\\.hs$" . haskell-mode) auto-mode-alist))
 
@@ -170,6 +174,10 @@
     (sp-local-pair "'" nil :actions nil)
     (sp-local-pair "\\(" nil :actions nil))
 
+  (yas-minor-mode t)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
+  (define-key yas-minor-mode-map (kbd "M-<tab>") 'yas-expand)
+
   ;; (interactive-haskell-mode)
 
   (hindent-mode t)
@@ -202,7 +210,6 @@
   (haskell-indentation-mode t)
 
   ;; (shm)
-  (define-key haskell-mode-map (kbd "M-<tab>") 'company-complete)
   (define-key haskell-mode-map (kbd "C-c C-f") 'inferior-haskell-find-definition)
   (define-key haskell-mode-map [?\C-c ?\C-z] 'haskell-interactive-switch)
   (define-key haskell-mode-map (kbd "C-c t") 'haskell-process-do-type )
@@ -220,6 +227,7 @@
   (define-key haskell-mode-map (kbd "C-c r") 'haskell-process-restart-and-load-file)
   (define-key haskell-mode-map (kbd "C-c C-r") 'haskell-process-for-tests)
   (define-key haskell-mode-map (kbd "C-c C-c") nil)
+  (define-key haskell-mode-map (kbd "C-c C-c C-d") 'intero-debug-mode)
   (define-key haskell-mode-map (kbd "C-c C-c C-c") 'haskell-compile)
   (define-key haskell-mode-map (kbd "C-c C-c C-t") 'haskell-stack-test)
   (define-key haskell-mode-map (kbd "C-c C-c C-m C-m") 'haskell-run-make)
