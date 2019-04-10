@@ -43,6 +43,9 @@
 
 (use-package gitignore-mode)
 
+(use-package direnv
+  :config
+  (direnv-mode))
 
 (use-package ido
   :init
