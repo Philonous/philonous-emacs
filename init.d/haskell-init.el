@@ -4,7 +4,7 @@
 (require 'flycheck)
 (require 'intero)
 
-(;; require 'intero-debug)
+;; (require 'intero-debug)
 
 (use-package intero)
 (use-package haskell-mode)
