@@ -4,7 +4,9 @@
 
 ;; require 'intero-debug)
 
-(use-package intero)
+(use-package intero
+  :pin melpa)
+
 (use-package flycheck)
 
 (use-package haskell-mode)

@@ -7,7 +7,7 @@
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
-;;                         ("melpa" . "http://melpa.milkbox.net/packages/")
+                         ("melpa" . "http://melpa.milkbox.net/packages/")
 			 ))
 
 (package-initialize)
@@ -21,10 +21,15 @@
   (message "installing use-package")
   (package-install 'use-package))
 
+(setq use-package-always-ping t)
 (setq package-archive-priorities
       '(("melpa-stable" . 20)
         ("gnu" . 10)
         ("melpa" . 0)))
+
+(use-package auto-package-update)
+
+(setq auto-package-update-delete-old-versions t)
 
 (defun load-inits ()
   (let ((init-files (directory-files (expand-file-name "init.d" user-emacs-directory) t "\.el$") ))
