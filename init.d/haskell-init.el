@@ -1,15 +1,16 @@
 (require 'custom-functions)
 (require 'haskell-import)
 ;; (require 'haskell-cabal)
-(require 'flycheck)
-(require 'intero)
 
 ;; (require 'intero-debug)
 
 (use-package intero)
+(use-package flycheck)
+
 (use-package haskell-mode)
 
-(setq auto-mode-alist (cons '("\\.hs$" . haskell-mode) auto-mode-alist))
+(add-to-list 'auto-mode-alist
+             '("\\.hs\\'" . haskell-mode))
 (add-to-list 'interpreter-mode-alist
              '("stack" . haskell-mode))
 

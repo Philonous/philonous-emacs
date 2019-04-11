@@ -7,3 +7,5 @@
     )
 
 (add-hook 'sh-mode-hook #'sh-mode-init)
+
+(add-to-list 'auto-mode-alist '("\\.envrc\\'" . sh-mode))

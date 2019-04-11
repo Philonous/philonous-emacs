@@ -1,11 +1,22 @@
 (require 'tramp)
 (require 'mon-rectangle-utils)
 
+
 (use-package zenburn-theme
   :config
   (load-theme 'zenburn t))
 
-(add-to-list 'default-frame-alist '(font . "Inconsolata-12"))
+;; ((name . eDP1) (geometry 0 0 2560 1440) (workarea 0 0 2560 1440) (mm-size 310 170) (frames #<frame .emacs-wrapped@blackbird 0x1405c80>) (source . Gdk))
+
+(defun select-fontsize ()
+  "Select default font size depending on monitor geomtry"
+  (let* ((geom (frame-monitor-attribute 'geometry))
+         (xpixels (- (caddr geom) (car geom))))
+    (cond ((< xpixels 3000) 10)
+          (t 12))))
+
+(add-to-list 'default-frame-alist
+             `(font . ,(format "Inconsolata-%s" (select-fontsize))))
 ;; (add-to-list 'default-frame-alist '(font . "Fira Code-12"))
 
 ;; key bindings
@@ -26,7 +37,6 @@
 (global-set-key (kbd "<C-kp-add>") 'increment-number-at-point)
 (global-set-key (kbd "<C-kp-subtract>") 'decrement-number-at-point)
 (global-set-key (kbd "<C-S-SPC>") 'set-rectangular-region-anchor)
-(global-set-key (kbd "M-e") 'er/expand-region)
 (global-set-key (kbd "M-z") 'zap-up-to-char)
 (global-set-key (kbd "C-c s") 'flysspell-region-or-buffer)
 (global-set-key (kbd "C-x C-b") 'switch-to-previous-buffer)
@@ -36,6 +46,10 @@
 (global-set-key (kbd "C-c p") 'check-parens)
 (global-set-key (kbd "C-c d") 'duplicate-line-or-region)
 
+(use-package expand-region
+  :bind ("M-e" . 'er/expand-region))
+;; (global-set-key (kbd "M-e") 'er/expand-region)
+
 ;; Automatically sets up magit-file-mode which sets C-x g etc
 (use-package magit
   :bind ("C-x g" . magit-status)
@@ -43,6 +57,9 @@
 
 (use-package gitignore-mode)
 
+(use-package direnv
+  :config
+  (direnv-mode))
 
 (use-package ido
   :init

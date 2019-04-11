@@ -2,11 +2,24 @@
 
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.
-(package-initialize)
+(require 'package)
+
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+;;                         ("melpa" . "http://melpa.milkbox.net/packages/")
+			 ))
+
+(package-initialize)
+(setq package-enable-at-startup nil)
+
+(unless package-archive-contents
+  (message "refreshing package contents")
+  (package-refresh-contents))
+
+(unless (package-installed-p 'use-package)
+  (message "installing use-package")
+  (package-install 'use-package))
 
 (setq package-archive-priorities
       '(("melpa-stable" . 20)

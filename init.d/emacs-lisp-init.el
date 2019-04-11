@@ -1,5 +1,2 @@
-(defun elisp-mode-init ()
-  (paredit-mode 1)
-  )
-
-(setq emacs-lisp-mode-hook 'elisp-mode-init)
+(use-package paredit
+  :hook (emacs-lisp-mode . paredit-mode))

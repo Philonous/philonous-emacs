@@ -1,4 +1,7 @@
-(add-hook 'prog-mode-hook 'fci-mode)
+(use-package smartparens)
+(use-package fill-column-indicator
+  :hook
+  prog-mode-hook)
 
 (defun occur-dwim ()
   "Call occur on word at point (if exists)"
