@@ -10,6 +10,8 @@
 (use-package haskell-mode)
 
 (setq auto-mode-alist (cons '("\\.hs$" . haskell-mode) auto-mode-alist))
+(add-to-list 'interpreter-mode-alist
+             '("stack" . haskell-mode))
 
 (defun haskell-process-restart-and-load-file ()
   "Restart the haskell process and load the file visited by buffer."
