@@ -6,8 +6,6 @@
   :config
   (load-theme 'zenburn t))
 
-;; ((name . eDP1) (geometry 0 0 2560 1440) (workarea 0 0 2560 1440) (mm-size 310 170) (frames #<frame .emacs-wrapped@blackbird 0x1405c80>) (source . Gdk))
-
 (defun select-fontsize ()
   "Select default font size depending on monitor geomtry"
   (let* ((geom (frame-monitor-attribute 'geometry))
