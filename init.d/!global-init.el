@@ -16,7 +16,7 @@
           (t 12))))
 
 (add-to-list 'default-frame-alist
-             ('font . (format "Inconsolata-%s" (select-fontsize))))
+             `(font . ,(format "Inconsolata-%s" (select-fontsize))))
 ;; (add-to-list 'default-frame-alist '(font . "Fira Code-12"))
 
 ;; key bindings
