@@ -56,6 +56,7 @@
 (use-package gitignore-mode)
 
 (use-package direnv
+  :pin melpa
   :config
   (direnv-mode))
 

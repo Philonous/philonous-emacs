@@ -21,13 +21,11 @@
   (message "installing use-package")
   (package-install 'use-package))
 
-(setq use-package-always-ping t)
+(setq use-package-always-pin "melpa")
 (setq package-archive-priorities
       '(("melpa-stable" . 20)
         ("gnu" . 10)
         ("melpa" . 0)))
-
-(use-package auto-package-update)
 
 (setq auto-package-update-delete-old-versions t)
 
@@ -50,7 +48,7 @@
    ;; initialize use-package
    (eval-when-compile (require 'use-package))
    (setq use-package-always-ensure t)
-
+   (use-package auto-package-update)
    ;; Load every *.el file in init.d in lexicographical order
    (load-inits)
 
