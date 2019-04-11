@@ -159,7 +159,7 @@
   ;; (require 'haskell-debug)
   ;; (require 'paredit)
   ;; (require 'intero)
-  (turn-on-font-lock)
+  ;; (turn-on-font-lock)
   (column-number-mode t)
   (subword-mode t)
   ;; (setq flymake-mode nil)
