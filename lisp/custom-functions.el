@@ -133,6 +133,7 @@ C-u 0 M-x enumerate-rectangle"
           ))))
 
 (defun layout-for-haskell2 ()
+  "3-column layout for 4k screen"
   (interactive)
   (save-selected-window
     (let ((haskell-buffer (get-haskell-buffer)))
@@ -154,6 +155,36 @@ C-u 0 M-x enumerate-rectangle"
                   (set-window-dedicated-p compile-window t ))
                 (set-window-parameter haskell-window 'no-other-window t)
                 (set-window-buffer right-window buffer-next-window )))))))))
+
+(defun layout-for-haskell-blackbird ()
+  "2-column layout for laptop screen"
+  (interactive)
+  (save-selected-window
+    (let ((haskell-buffer (get-haskell-buffer)))
+      (progn
+        (mapc 'delete-window (get-buffer-window-list haskell-buffer))
+        (let ((buffer-next-window (window-buffer (next-window))))
+          (progn
+            (delete-other-windows)
+            (let* ((right-window (split-window-right (- (/ (window-total-width) 2))))
+                   (haskell-window (split-window-below -20)))
+              (progn
+                (set-window-buffer haskell-window haskell-buffer )
+                (set-window-dedicated-p haskell-window t )
+                ;; (with-selected-window compile-window
+                ;;   (switch-to-buffer "*haskell-compilation*")
+                ;;   (set-window-dedicated-p compile-window t ))
+                (set-window-parameter haskell-window 'no-other-window t)
+                (set-window-buffer right-window buffer-next-window )))))))))
+
+(defun layout-for-haskell-choose-by-hostname ()
+  "Split windows depending on hostname"
+  (interactive)
+  (let* ((hostname (system-name)))
+    (cond
+     ((string= hostname "blackbird") (layout-for-haskell-blackbird))
+     ((string= hostname "tukan") (layout-for-haskell2))
+     (t (layout-for-haskell2)))))
 
 (defun haskell-tag-find (ident &optional next-p)
   "Jump to tag"

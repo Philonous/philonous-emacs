@@ -1,4 +1,7 @@
-(use-package smartparens)
+(use-package smartparens
+  :hook ((haskell-mode rust-mode nix-mode)
+         . smartparens-mode))
+
 (use-package fill-column-indicator
   :hook
   prog-mode-hook)

@@ -11,6 +11,9 @@
 
 (use-package haskell-mode)
 
+(use-package hindent
+  :hook (haskell-mode . hindent-mode))
+
 (add-to-list 'auto-mode-alist
              '("\\.hs\\'" . haskell-mode))
 (add-to-list 'interpreter-mode-alist
@@ -170,8 +173,6 @@
   ;; (setq flymake-mode nil)
   ;; (flyspell-prog-mode)
   (intero-mode-init)
-  (require 'smartparens)
-  (smartparens-mode t)
   ;; (add-to-list 'flycheck-disabled-checkers 'haskell-ghc)
   ;; (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
   (sp-with-modes '(haskell-mode haskell-interactive-mode)
@@ -225,7 +226,7 @@
   (define-key haskell-mode-map (kbd "C-c C-d") 'haskell-mode-save-buffer-and-tags)
   (define-key haskell-mode-map (kbd "C-`") 'haskell-go-to-haskell-window)
   (define-key haskell-mode-map (kbd "M-`") 'haskell-go-to-haskell-window)
-  (define-key haskell-mode-map (kbd "<f11>") 'layout-for-haskell2)
+  (define-key haskell-mode-map (kbd "<f11>") 'layout-for-haskell-choose-by-hostname)
   (define-key haskell-mode-map (kbd "<f8>") 'haskell-navigate-imports)
   (define-key haskell-mode-map (kbd "<backspace>") 'backward-delete-char)
   (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-clear-interactive-window)
