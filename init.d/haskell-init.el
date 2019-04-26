@@ -4,8 +4,14 @@
 
 ;; (require 'intero-debug)
 
-(use-package intero
-  :pin melpa)
+;;; intero dante etc.
+
+;; (use-package intero
+;;   :pin melpa)
+
+(use-package dante
+  :hook ((haskell-mode . flycheck-mode)
+         (haskell-mode . dante-mode)))
 
 (use-package flycheck)
 
@@ -119,7 +125,7 @@
       (compilation-start "stack test" 'haskell-compilation-mode)
     (error "No stack.yaml found")))
 
-(defvar with-intero-mode t)
+
 
 ;; (setf (flycheck-checker-get 'intero 'next-checkers) nil)
 
@@ -172,7 +178,7 @@
   (subword-mode t)
   ;; (setq flymake-mode nil)
   ;; (flyspell-prog-mode)
-  (intero-mode-init)
+  ;; (intero-mode-init)
   ;; (add-to-list 'flycheck-disabled-checkers 'haskell-ghc)
   ;; (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
   (sp-with-modes '(haskell-mode haskell-interactive-mode)
@@ -233,7 +239,7 @@
   (define-key haskell-mode-map (kbd "C-c r") 'haskell-process-restart-and-load-file)
   (define-key haskell-mode-map (kbd "C-c C-r") 'haskell-process-for-tests)
   (define-key haskell-mode-map (kbd "C-c C-c") nil)
-  (define-key haskell-mode-map (kbd "C-c C-c C-d") 'intero-debug-mode)
+  ;; (define-key haskell-mode-map (kbd "C-c C-c C-d") 'intero-debug-mode)
   (define-key haskell-mode-map (kbd "C-c C-c C-c") 'haskell-compile)
   (define-key haskell-mode-map (kbd "C-c C-c C-t") 'haskell-stack-test)
   (define-key haskell-mode-map (kbd "C-c C-c C-m C-m") 'haskell-run-make)
@@ -273,12 +279,6 @@
                                                    (flycheck-list-errors))
                                                (message "No errors.")
                                                ))
-
-  ;; (define-key intero-mode-map (kbd "C-c C-l") nil)
-
-  ;;Intero
-
-  ;; (intero-mode t)
   )
 
 (setq haskell-mode-hook #'haskell-mode-init)
