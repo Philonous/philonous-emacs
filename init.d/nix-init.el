@@ -1,2 +1,4 @@
 (use-package nix-mode)
-(use-package company-nixos-options)
+
+;;; Possibly useful? But very slow
+;; (use-package company-nixos-options)
