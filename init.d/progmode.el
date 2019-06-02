@@ -15,7 +15,7 @@
                    (buffer-substring-no-properties
                     (region-beginning)
                     (region-end))
-                 (thing-at-point 'word) (thing-at-point 'word))))
+                 (thing-at-point 'word))))
     (if here
         (funcall-interactively #'occur here)
         (call-interactively #'occur))))
