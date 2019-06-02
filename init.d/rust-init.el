@@ -9,6 +9,18 @@
 (require 's)
 (require 'dash)
 
+(use-package rust-mode)
+(use-package flycheck-rust)
+(use-package company-racer)
+(use-package cargo
+  :hook (rust-mode . cargo-minor-mode)
+  )
+(use-package lsp-mode
+  :hook rust-mode
+  )
+(use-package lsp-ui)
+
+
 (defun rust-add-sysroot ()
   (-if-let (sysroot (shell-command-to-string "rustc +nightly --print sysroot"))
       (let* ((path (concat (s-trim sysroot) "/lib"))
