@@ -10,12 +10,18 @@
 ;;   :pin melpa)
 
 (use-package dante
+  :config
+  (add-to-list 'flycheck-checkers 'haskell-dante)
+  (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint))
   :hook ((haskell-mode . flycheck-mode)
          (haskell-mode . dante-mode)))
 
 (use-package flycheck)
+(setq flycheck-check-syntax-automatically '(save mode-enabled))
 
-(use-package haskell-mode)
+(use-package haskell-mode
+  :pin melpa
+  )
 
 (use-package hindent
   :hook (haskell-mode . hindent-mode))

@@ -42,6 +42,65 @@
  '(dante-methods
    (quote
     (stack styx new-impure-nix new-nix nix impure-nix new-build nix-ghci mafia bare-cabal bare-ghci)))
+ '(dante-methods-alist
+   (quote
+    ((styx "styx.yaml"
+           ("styx" "repl" dante-target))
+     (new-impure-nix dante-cabal-new-nix
+                     ("nix-shell" "--run"
+                      (concat "cabal new-repl "
+                              (or dante-target
+                                  (dante-package-name)
+                                  "")
+                              " --builddir=dist/dante")))
+     (new-nix dante-cabal-new-nix
+              ("nix-shell" "--pure" "--run"
+               (concat "cabal new-repl "
+                       (or dante-target
+                           (dante-package-name)
+                           "")
+                       " --builddir=dist/dante")))
+     (nix dante-cabal-nix
+          ("nix-shell" "--pure" "--run"
+           (concat "cabal repl "
+                   (or dante-target "")
+                   " --builddir=dist/dante")))
+     (impure-nix dante-cabal-nix
+                 ("nix-shell" "--run"
+                  (concat "cabal repl "
+                          (or dante-target "")
+                          " --builddir=dist/dante")))
+     (new-build "cabal.project"
+                ("cabal" "new-repl"
+                 (or dante-target
+                     (dante-package-name)
+                     "")
+                 "--builddir=dist/dante"))
+     (nix-ghci
+      #[257 "\300\301\302#\207"
+            [directory-files t "shell.nix\\|default.nix"]
+            5 "
+
+(fn D)"]
+      ("nix-shell" "--pure" "--run" "ghci"))
+     (stack "stack.yaml"
+            ("stack" "repl" "--ghci-options=-ferror-spans -fdiagnostics-color=never" dante-target))
+     (mafia "mafia"
+            ("mafia" "repl" dante-target))
+     (bare-cabal
+      #[257 "\300\301\302#\207"
+            [directory-files t ".cabal$"]
+            5 "
+
+(fn D)"]
+      ("cabal" "repl" dante-target "--builddir=dist/dante"))
+     (bare-ghci
+      #[257 "\300\207"
+            [t]
+            2 "
+
+(fn _)"]
+      ("ghci")))))
  '(ecb-options-version "2.40")
  '(ecb-source-path
    (quote
@@ -63,7 +122,9 @@
  '(haskell-indentation-left-offset 2)
  '(haskell-notify-p t)
  '(haskell-process-args-cabal-repl nil)
- '(haskell-process-args-stack-ghci (quote ("--ghci-options=-ferror-spans")))
+ '(haskell-process-args-stack-ghci
+   (quote
+    ("--ghci-options=-ferror-spans -fdiagnostics-color=never" "--color" "never")))
  '(haskell-process-log t)
  '(haskell-process-path-cabal "cabal")
  '(haskell-process-path-cabal-ghci "cabal")
@@ -77,13 +138,14 @@
  '(haskell-tags-on-save t)
  '(ido-confirm-unique-completion t)
  '(js-indent-level 2)
+ '(lsp-prefer-flymake nil)
  '(package-selected-packages
    (quote
-    (gitignore-mode which-key use-package php-mode elm-mode logstash-conf camcorder dashboard savekill async company dash dash-functional find-file-in-project git-commit haskell-mode helm-core highlight-indentation ht ido-completing-read+ ivy js2-mode julia-mode know-your-http-well magit marshal mmm-mode pyvenv s simple-httpd ssass-mode tern typescript-mode with-editor magit-find-file git-gutter+ git-timemachine company-nixos-options nix-mode nixos-options racer cargo flycheck-rust intero "hindent" "hindent-mode" ag rjsx-mode request js2-highlight-vars jsx-mode vue-html-mode vue-mode company-restclient restclient js-doc web-mode company-tern stan-mode stan-snippets company-auctex auctex ample-theme ample-zen-theme monokai-theme anti-zenburn-theme solarized-theme silkworm-theme ess gist py-autopep8 elpy zenburn-theme yasnippet yaml-mode yagist visible-mark ujelly-theme toml-mode tidy tide tern-auto-complete tagedit soft-stone-theme smex smartparens skewer-mode register-list rainbow-delimiters pov-mode peg paredit nodejs-repl multiple-cursors markdown-mode magit-tramp magit-filenotify lua-mode less-css-mode jist jdee interaction-log ido-vertical-mode ido-ubiquitous hindent highlight helm guru-mode groovy-mode git-gutter-fringe gh flymake-easy flx-ido fill-column-indicator f expand-region ecb-snapshot dockerfile-mode docker csv-mode cryptol-mode color-theme-tango color-theme-solarized color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized anything angular-snippets angular-mode ac-etags)))
+    (lsp-ui lsp-mode lsp cargo-mode company-racer flycheck-rust-mode rust-mode auto-package-update dante direnv gitignore-mode which-key use-package php-mode elm-mode logstash-conf camcorder dashboard savekill async company dash dash-functional find-file-in-project git-commit haskell-mode helm-core highlight-indentation ht ido-completing-read+ ivy js2-mode julia-mode know-your-http-well magit marshal mmm-mode pyvenv s simple-httpd ssass-mode tern typescript-mode with-editor magit-find-file git-gutter+ git-timemachine company-nixos-options nix-mode nixos-options racer cargo flycheck-rust intero "hindent" "hindent-mode" ag rjsx-mode request js2-highlight-vars jsx-mode vue-html-mode vue-mode company-restclient restclient js-doc web-mode company-tern stan-mode stan-snippets company-auctex auctex ample-theme ample-zen-theme monokai-theme anti-zenburn-theme solarized-theme silkworm-theme ess gist py-autopep8 elpy zenburn-theme yasnippet yaml-mode yagist visible-mark ujelly-theme toml-mode tidy tide tern-auto-complete tagedit soft-stone-theme smex smartparens skewer-mode register-list rainbow-delimiters pov-mode peg paredit nodejs-repl multiple-cursors markdown-mode magit-tramp magit-filenotify lua-mode less-css-mode jist jdee interaction-log ido-vertical-mode ido-ubiquitous hindent highlight helm guru-mode groovy-mode git-gutter-fringe gh flymake-easy flx-ido fill-column-indicator f expand-region ecb-snapshot dockerfile-mode docker csv-mode cryptol-mode color-theme-tango color-theme-solarized color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized anything angular-snippets angular-mode ac-etags)))
  '(python-shell-interpreter "python2")
  '(racer-rust-src-path
    "/home/uart14/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src")
- '(rust-rustfmt-bin "~/.cargo/bin/rustfmt")
+ '(rust-rustfmt-bin "rustfmt")
  '(safe-local-variable-values
    (quote
     ((intero-targets "auth-service:lib" "auth-service:exe:auth-service" "auth-service:test:api-tests" "auth-service:test:unit-tests")
