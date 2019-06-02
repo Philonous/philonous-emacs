@@ -6,6 +6,8 @@
   :hook
   prog-mode-hook)
 
+(add-hook 'prog-mode-hook #'column-number-mode)
+
 (defun occur-dwim ()
   "Call occur on word at point (if exists)"
   (interactive)

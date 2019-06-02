@@ -1,6 +1,7 @@
 (require 'tramp)
 (require 'mon-rectangle-utils)
 
+(use-package ag)
 
 (use-package zenburn-theme
   :config
@@ -50,6 +51,7 @@
 
 ;; Automatically sets up magit-file-mode which sets C-x g etc
 (use-package magit
+  :pin melpa-stable
   :bind ("C-x g" . magit-status)
   )
 
@@ -133,3 +135,5 @@
 (desktop-save-mode 0)
 
 (use-package multiple-cursors)
+
+(use-package yaml-mode)
