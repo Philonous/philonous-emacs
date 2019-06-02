@@ -5,4 +5,7 @@
 (use-package tagedit
   :config
   (tagedit-add-paredit-like-keybindings)
-  :hook html-mode)
+  (tagedit-add-experimental-features)
+  :hook (html-mode . tagedit-mode))
+
+(setq sgml-quick-keys 'close)

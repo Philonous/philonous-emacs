@@ -1,6 +1,8 @@
 (require 'compile)
 (require 'subr-x)
 
+(use-package js2-mode)
+
 (add-to-list 'compilation-error-regexp-alist-alist
              '(eslint "^\\(\w+\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3))
 (add-to-list 'compilation-error-regexp-alist 'eslint)
