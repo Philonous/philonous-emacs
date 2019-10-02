@@ -1,3 +1,5 @@
+;;; JS
+
 (require 'compile)
 (require 'subr-x)
 
@@ -107,3 +109,22 @@
   )
 
 (add-hook 'rjsx-mode-hook #'rjsx-mode-init)
+
+
+;;; HTML
+
+(use-package company-tern
+  :config
+  (add-to-list 'company-backends 'company-tern))
+
+(use-package tagedit
+  :config
+  (tagedit-add-paredit-like-keybindings)
+  (tagedit-add-experimental-features)
+  :hook (html-mode . tagedit-mode))
+
+(setq sgml-quick-keys 'close)
+
+;;; Web mode
+(use-package web-mode
+  )
