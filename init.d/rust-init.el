@@ -10,16 +10,9 @@
 (require 'dash)
 
 (use-package rust-mode)
-(use-package flycheck-rust)
-(use-package company-racer)
 (use-package cargo
   :hook (rust-mode . cargo-minor-mode)
   )
-(use-package lsp-mode
-  :hook rust-mode
-  )
-(use-package lsp-ui)
-
 
 (defun rust-add-sysroot ()
   (-if-let (sysroot (shell-command-to-string "rustc +nightly --print sysroot"))
@@ -36,14 +29,8 @@
 
 (defun rust-mode-init ()
   (require 'rust-mode)
-  (require 'flycheck-rust)
-  (rust-add-sysroot)
   (sp-with-modes '(rust-mode)
     (sp-local-pair "'" nil :actions nil))
-  (column-number-mode t)
-  (flycheck-rust-setup)
-  (flycheck-mode t)
-  (cargo-minor-mode t)
-  (rust-enable-format-on-save))
+  )
 
 (add-hook 'rust-mode-hook #'rust-mode-init)

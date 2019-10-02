@@ -16,12 +16,22 @@
   :hook ((haskell-mode . flycheck-mode)
          (haskell-mode . dante-mode)))
 
+(use-package intero)
+
 (use-package flycheck)
 (setq flycheck-check-syntax-automatically '(save mode-enabled))
 
 (use-package haskell-mode
   :pin melpa
   )
+
+(use-package lsp-haskell
+ :config
+ (setq lsp-haskell-process-path-hie "ghcide")
+ (setq lsp-haskell-process-args-hie '())
+ ;; Comment/uncomment this line to see interactions between lsp client/server.
+ ;;(setq lsp-log-io t)
+)
 
 (use-package hindent
   :hook (haskell-mode . hindent-mode))

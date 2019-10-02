@@ -1,3 +1,14 @@
+(use-package lsp-mode
+  :commands lsp
+  :hook ((rust-mode . lsp)
+         (haskell-mode . lsp)
+         ))
+
+(use-package lsp-ui)
+(use-package company-lsp)
+
+(use-package dap-mode)
+
 (use-package smartparens
   :hook ((haskell-mode rust-mode nix-mode)
          . smartparens-mode))
