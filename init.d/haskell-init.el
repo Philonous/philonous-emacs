@@ -9,12 +9,12 @@
 ;; (use-package intero
 ;;   :pin melpa)
 
-(use-package dante
-  :config
-  (add-to-list 'flycheck-checkers 'haskell-dante)
-  (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint))
-  :hook ((haskell-mode . flycheck-mode)
-         (haskell-mode . dante-mode)))
+;; (use-package dante
+;;   :config
+;;   (add-to-list 'flycheck-checkers 'haskell-dante)
+;;   (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint))
+;;   :hook ((haskell-mode . flycheck-mode)
+;;          (haskell-mode . dante-mode)))
 
 (use-package intero)
 
@@ -27,7 +27,6 @@
 
 (use-package lsp-haskell
  :config
- (setq lsp-haskell-process-path-hie "ghcide")
  (setq lsp-haskell-process-args-hie '())
  ;; Comment/uncomment this line to see interactions between lsp client/server.
  ;;(setq lsp-log-io t)
@@ -46,14 +45,6 @@
   (interactive)
   (progn (haskell-process-restart)
          (haskell-process-load-file)))
-
-(defun shm ()
-  "Start structures haskell mode."
-  (interactive)
-  (require 'shm)
-  (structured-haskell-mode t)
-  (require 'shm-case-split)
-  (define-key haskell-mode-map (kbd "C-c C-s") 'shm-case-split))
 
 ;; Load mode. This
 
@@ -149,6 +140,43 @@
 ;;; severe than warnings
 ;; (flycheck-add-next-checker 'intero '(warning . haskell-hlint))
 
+(defvar-local haskell-init--ide-mode nil
+  "Which haskell IDE engine to use (e.g. intero, haskell-ide-engine)")
+
+(add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . intero))
+(add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . ghcide))
+(add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . lsp))
+(add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . hie))
+(add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . none))
+
+(defun haskell-init--choose-ide-mode ()
+  "Choose an IDE mode (i.e. intero, lsp) for this file"
+  (interactive)
+  (if (string= major-mode "haskell-mode")
+      (progn
+        (message "Got ide mode %s" haskell-init--ide-mode)
+        (cond ((equal haskell-init--ide-mode 'intero) (intero-mode t))
+              ((equal haskell-init--ide-mode 'ghcide)
+               (setq lsp-haskell-process-path-hie "ghcide")
+               (lsp))
+              ((equal haskell-init--ide-mode 'lsp) (lsp))
+              ((equal haskell-init--ide-mode 'hie)
+               (lambda ()
+                 (make-local-variable 'lsp-haskell-process-path-hie)
+                 (setq lsp-haskell-process-path-hie "hie")
+                 (make-local-variable lsp-haskell-process-args-hie)
+                 (setq lsp-haskell-process-args-hie '())
+                 (lsp)
+                 ))
+              ((eq haskell-init--ide-mode 'none) t)
+              ;; If no mode is explicitly set, we try to guess one
+              ((locate-dominating-file default-directory "stack.yaml")
+               (intero-mode t))
+              ))))
+
+
+(add-hook 'hack-local-variables-hook #'haskell-init--choose-ide-mode t)
+
 (defun intero-mode-init ()
   "Initialization for Intero mode."
   (require 'intero)
@@ -179,7 +207,7 @@
                                                                            )))
   (define-key intero-mode-map (kbd "C-c C-r") 'intero-apply-suggestions)
   (define-key intero-mode-map (kbd "C-c C-e") 'intero-expand-splice-at-point)
-  (define-key intero-mode-map (kbd "M-g M-n") 'flycheck-next-error)
+  (define-key intero-mode-map (kbd "C-c M-e") 'mc/mark-next-like-this)
   (define-key intero-mode-map (kbd "C-c r") 'intero-restart)
   )
 
@@ -191,6 +219,24 @@
   ;; (require 'intero)
   ;; (turn-on-font-lock)
   (column-number-mode t)
+
+  (setq mode-line-format (list "%e"
+                          mode-line-front-space
+                          "%*"
+                          mode-line-remote
+                          " "
+                          mode-line-buffer-identification
+                          mode-line-position
+                          mode-line-modes
+                          mode-line-misc-info
+                          mode-line-end-spaces)
+        )
+
+  (diminish 'auto-revert-mode)
+  (diminish 'hindent-mode)
+  (diminish 'yas-minor-mode)
+  (diminish 'subword-mode)
+
   (subword-mode t)
   ;; (setq flymake-mode nil)
   ;; (flyspell-prog-mode)
@@ -202,7 +248,7 @@
     (sp-local-pair "'" nil :actions nil)
     (sp-local-pair "\\(" nil :actions nil))
 
-  (yas-minor-mode t)
+  ;; (yas-minor-mode t)
   (define-key yas-minor-mode-map (kbd "TAB") nil)
   (define-key yas-minor-mode-map (kbd "M-<tab>") 'yas-expand)
 
@@ -237,7 +283,6 @@
                  (modes quote (haskell-mode literate-haskell-mode))))
   (haskell-indentation-mode t)
 
-  ;; (shm)
   (define-key haskell-mode-map (kbd "C-c C-f") 'inferior-haskell-find-definition)
   (define-key haskell-mode-map [?\C-c ?\C-z] 'haskell-interactive-switch)
   (define-key haskell-mode-map (kbd "C-c t") 'haskell-process-do-type )
@@ -295,9 +340,10 @@
                                                    (flycheck-list-errors))
                                                (message "No errors.")
                                                ))
+  (define-key intero-mode-map (kbd "C-c C-e") 'mc/mark-next-like-this)
   )
 
-(setq haskell-mode-hook #'haskell-mode-init)
+(add-hook 'haskell-mode-hook #'haskell-mode-init)
 
 (setq haskell-interactive-mode-hook
            (lambda ()
@@ -310,3 +356,11 @@
   (define-key intero-repl-mode-map (kbd "M-`") 'haskell-go-to-old-window))
 
 (add-hook 'intero-repl-mode-hook #'intero-repl-mode-init)
+
+(use-package origami
+  :hook (haskell-mode . origami-mode)
+  :config
+  (define-key origami-mode-map (kbd "C-M-i") 'origami-recursively-toggle-node)
+  (define-key origami-mode-map (kbd "C-c @ a") 'origami-open-all-nodes)
+  (define-key origami-mode-map (kbd "C-c @ d") 'origami-close-all-nodes)
+  )

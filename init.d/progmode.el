@@ -1,7 +1,7 @@
 (use-package lsp-mode
   :commands lsp
   :hook ((rust-mode . lsp)
-         (haskell-mode . lsp)
+         ;; (haskell-mode . lsp)
          ))
 
 (use-package lsp-ui)
