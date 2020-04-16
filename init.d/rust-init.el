@@ -29,6 +29,7 @@
 
 (defun rust-mode-init ()
   (require 'rust-mode)
+  (require 'smartparens)
   (sp-with-modes '(rust-mode)
     (sp-local-pair "'" nil :actions nil))
   )
