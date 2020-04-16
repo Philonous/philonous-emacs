@@ -14,9 +14,17 @@
     (cond ((< xpixels 3000) 10)
           (t 12))))
 
+
+(use-package diminish
+  :config
+  (diminish 'eldoc-mode)
+  (diminish 'visual-line-mode))
+
 (add-to-list 'default-frame-alist
              `(font . ,(format "Inconsolata-%s" (select-fontsize))))
 ;; (add-to-list 'default-frame-alist '(font . "Fira Code-12"))
+
+
 
 ;; key bindings
 (global-set-key (kbd "C-c <f5>") 'buffer-menu)
@@ -55,9 +63,16 @@
   :bind ("C-x g" . magit-status)
   )
 
+(use-package forge
+  :pin melpa-stable
+  :after magit
+  )
+
+
 (use-package git-gutter-fringe
   :config
   (global-git-gutter-mode t)
+  :diminish git-gutter-mode
   )
 
 (use-package gitignore-mode)
@@ -67,36 +82,61 @@
   :config
   (direnv-mode))
 
-(use-package ido
-  :init
-  (setq ido-use-faces nil)
-  (setq ido-show-dot-for-dired t)
-  (setq ido-default-buffer-method 'samewindow)
-  (setq ido-default-file-method 'selected-window)
-  (setq ido-auto-merge-work-directories-length -1)
-  :config
-  (ido-mode t))
-
-(use-package flx-ido
-  :config
-  (flx-ido-mode t)
-  )
-(use-package ido-completing-read+
-  :config
-  (ido-ubiquitous-mode t))
-
-(use-package ido-vertical-mode
-  :init
-  (setq ido-vertical-define-keys 'C-n-C-p-up-down-left-right)
-  :config
-  (ido-vertical-mode t))
-
 ;; IDO mode
+
+;; (use-package ido
+;;   :init
+;;   (setq ido-use-faces nil)
+;;   (setq ido-show-dot-for-dired t)
+;;   (setq ido-default-buffer-method 'samewindow)
+;;   (setq ido-default-file-method 'selected-window)
+;;   (setq ido-auto-merge-work-directories-length -1)
+;;   :config
+;;   (ido-mode t))
+
+;; (use-package flx-ido
+;;   :config
+;;   (flx-ido-mode t)
+;;   )
+;; (use-package ido-completing-read+
+;;   :config
+;;   (ido-ubiquitous-mode t))
+
+;; (use-package ido-vertical-mode
+;;   :init
+;;   (setq ido-vertical-define-keys 'C-n-C-p-up-down-left-right)
+;;   :config
+;;   (ido-vertical-mode t))
+
 
 ;; (smex-initialize)
 ;; (global-set-key (kbd "M-x") 'smex)
 ;; (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 ;; This is your old M-x.
+
+;;;;;;;;;;;;;;;;;;;;;
+
+(use-package ivy
+  :pin melpa-stable
+  :config
+  (ivy-mode t)
+  :diminish
+  )
+
+(use-package counsel
+  :pin melpa-stable
+  :config
+  (counsel-mode t)
+  :diminish
+  )
+
+(use-package swiper
+  :pin melpa-stable
+  :config
+  (global-set-key (kbd "C-s") #'swiper)
+  (global-set-key (kbd "C-r") #'swiper-backward)
+  :diminish
+  )
 
 ;; Yasnippets
 
@@ -110,7 +150,9 @@
 (use-package company
   :bind ("∈" . 'company-complete)
   :config
-  (global-company-mode))
+  (global-company-mode)
+  :diminish
+  )
 
 ;; which-keys
 
@@ -142,3 +184,15 @@
 (use-package multiple-cursors)
 
 (use-package yaml-mode)
+
+(use-package poe-lootfilter-mode)
+
+(use-package projectile
+  :config
+  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  :diminish
+  :hook (haskell-mode . projectile-mode)
+  )
+
+(setq require-final-newline 'visit-save)
