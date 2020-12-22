@@ -138,7 +138,6 @@
   (save-excursion
     (let* ((force-abbrev (string= (substring import-line 0 1) "!"))
            (import (if force-abbrev (substring import-line 1) import-line))
-           (args ( ) )
            (args (or (cdr (assoc import haskell-import-module-abbrevs))
                       (when force-abbrev
                         (error "Module abbreviation \"%s\" not found" import))

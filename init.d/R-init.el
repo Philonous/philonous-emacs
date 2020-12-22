@@ -18,6 +18,14 @@
      (comint-truncate-buffer)
      (setq comint-buffer-maximum-size old-max)))
 
+
+(use-package ess
+  :pin melpa-stable
+  :config
+  (add-hook 'ess-mode-hook 'r-mode-init
+   )
+  )
+
 (defun r-mode-init ()
   (interactive)
   (require 'smartparens)
@@ -38,7 +46,3 @@
   (define-key inferior-ess-mode-map (kbd "C-c C-k") 'clear-shell)
   (define-key inferior-ess-mode-map (kbd "_") 'self-insert-command)
   )
-
-
-
-(setq ess-mode-hook 'r-mode-init)

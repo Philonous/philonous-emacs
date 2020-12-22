@@ -6,8 +6,8 @@
 
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                         ("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")
+                         ("melpa-stable" . "https://stable.melpa.org/packages/")
+                         ("melpa" . "https://melpa.org/packages/")
 			 ))
 
 (package-initialize)
@@ -27,7 +27,7 @@
         ("gnu" . 10)
         ("melpa" . 0)))
 
-(setq auto-package-update-delete-old-versions t)
+;; (setq auto-package-update-delete-old-versions t)
 
 (defun load-inits ()
   (let ((init-files (directory-files (expand-file-name "init.d" user-emacs-directory) t "\.el$") ))
@@ -48,7 +48,7 @@
    ;; initialize use-package
    (eval-when-compile (require 'use-package))
    (setq use-package-always-ensure t)
-   (use-package auto-package-update)
+   ;; (use-package auto-package-update)
    ;; Load every *.el file in init.d in lexicographical order
    (load-inits)
 

@@ -1,17 +1,21 @@
 (use-package lsp-mode
+  :pin melpa
   :commands lsp
   :hook ((rust-mode . lsp)
          ;; (haskell-mode . lsp)
          ))
 
-(use-package lsp-ui)
+(use-package lsp-ui :pin melpa :commands lsp-ui-mode)
+;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 (use-package company-lsp)
 
 (use-package dap-mode)
 
 (use-package smartparens
   :hook ((haskell-mode rust-mode nix-mode)
-         . smartparens-mode))
+         . smartparens-mode)
+  :diminish
+  )
 
 (use-package fill-column-indicator
   :hook

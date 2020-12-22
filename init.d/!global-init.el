@@ -1,7 +1,13 @@
 (require 'tramp)
+
+(use-package vagrant-tramp)
+
 (require 'mon-rectangle-utils)
 
-(use-package ag)
+;;; Ripgrep
+(use-package deadgrep
+  :config
+  (defalias 'rg 'deadgrep))
 
 (use-package zenburn-theme
   :config
@@ -63,12 +69,6 @@
   :bind ("C-x g" . magit-status)
   )
 
-(use-package forge
-  :pin melpa-stable
-  :after magit
-  )
-
-
 (use-package git-gutter-fringe
   :config
   (global-git-gutter-mode t)
@@ -82,51 +82,12 @@
   :config
   (direnv-mode))
 
-;; IDO mode
-
-;; (use-package ido
-;;   :init
-;;   (setq ido-use-faces nil)
-;;   (setq ido-show-dot-for-dired t)
-;;   (setq ido-default-buffer-method 'samewindow)
-;;   (setq ido-default-file-method 'selected-window)
-;;   (setq ido-auto-merge-work-directories-length -1)
-;;   :config
-;;   (ido-mode t))
-
-;; (use-package flx-ido
-;;   :config
-;;   (flx-ido-mode t)
-;;   )
-;; (use-package ido-completing-read+
-;;   :config
-;;   (ido-ubiquitous-mode t))
-
-;; (use-package ido-vertical-mode
-;;   :init
-;;   (setq ido-vertical-define-keys 'C-n-C-p-up-down-left-right)
-;;   :config
-;;   (ido-vertical-mode t))
-
-
-;; (smex-initialize)
-;; (global-set-key (kbd "M-x") 'smex)
-;; (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-;; This is your old M-x.
-
 ;;;;;;;;;;;;;;;;;;;;;
 
 (use-package ivy
   :pin melpa-stable
   :config
   (ivy-mode t)
-  :diminish
-  )
-
-(use-package counsel
-  :pin melpa-stable
-  :config
-  (counsel-mode t)
   :diminish
   )
 
@@ -151,7 +112,7 @@
   :bind ("∈" . 'company-complete)
   :config
   (global-company-mode)
-  :diminish
+  :diminish company-mode
   )
 
 ;; which-keys
@@ -174,10 +135,22 @@
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 (put 'erase-buffer 'disabled nil)
-(mouse-avoidance-mode 'banish)
+(mouse-avoidance-mode 'none)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+(defvar user-temporary-file-directory
+  (concat temporary-file-directory user-login-name "/emacs/" ))
+(make-directory user-temporary-file-directory t)
+(setq backup-by-copying t)
 (setq backup-directory-alist
-      (list (cons "." (expand-file-name "backup" user-emacs-directory))))
+      `(("." . ,user-temporary-file-directory)
+        (,tramp-file-name-regexp nil)))
+(setq auto-save-list-file-prefix
+      (concat user-temporary-file-directory ".auto-saves-"))
+(setq auto-save-file-name-transforms
+      `((".*" ,user-temporary-file-directory t)))
+
+
 (tool-bar-mode -1)
 (desktop-save-mode 0)
 
@@ -196,3 +169,42 @@
   )
 
 (setq require-final-newline 'visit-save)
+
+(use-package writegood-mode)
+
+(use-package treemacs
+  :config
+  (progn
+    (setq treemacs-position 'left)
+    (setq treemacs-width 28)
+    )
+  (treemacs-resize-icons 28)
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t)
+  (treemacs-fringe-indicator-mode t)
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+
+(use-package treemacs-magit
+  :hook treemacs
+  )
+
+;; (use-package undo-tree)
+
+
+(use-package autoinsert
+  :config
+  (setq auto-insert-query nil)
+  (auto-insert-mode 1)
+  (add-hook 'find-file-hook 'auto-insert)
+  (setq auto-insert-alist nil))
+
+;;; https://github.com/bbatsov/prelude/issues/1225
+;; (use-package undo-tree )

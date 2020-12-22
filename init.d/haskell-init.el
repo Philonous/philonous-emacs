@@ -18,8 +18,11 @@
 
 (use-package intero)
 
-(use-package flycheck)
-(setq flycheck-check-syntax-automatically '(save mode-enabled))
+(use-package flycheck
+  :pin melpa
+  )
+
+;; (setq flycheck-check-syntax-automatically '(save mode-enabled)) ;; LSP
 
 (use-package haskell-mode
   :pin melpa
@@ -27,13 +30,20 @@
 
 (use-package lsp-haskell
  :config
- (setq lsp-haskell-process-args-hie '())
+ ;; (setq lsp-haskell-process-args-hie '())
  ;; Comment/uncomment this line to see interactions between lsp client/server.
- ;;(setq lsp-log-io t)
-)
+ (setq lsp-log-io nil)
+ :bind
+ (:map lsp-mode-map
+       ("M-." . xref-find-definitions)
+       ("C-c C-a" . lsp-execute-code-action)
+       )
+ )
 
 (use-package hindent
-  :hook (haskell-mode . hindent-mode))
+  :hook (haskell-mode . hindent-mode)
+  :diminish
+  )
 
 (add-to-list 'auto-mode-alist
              '("\\.hs\\'" . haskell-mode))
@@ -147,6 +157,7 @@
 (add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . ghcide))
 (add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . lsp))
 (add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . hie))
+(add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . hls))
 (add-to-list 'safe-local-variable-values '(haskell-init--ide-mode . none))
 
 (defun haskell-init--choose-ide-mode ()
@@ -157,9 +168,16 @@
         (message "Got ide mode %s" haskell-init--ide-mode)
         (cond ((equal haskell-init--ide-mode 'intero) (intero-mode t))
               ((equal haskell-init--ide-mode 'ghcide)
-               (setq lsp-haskell-process-path-hie "ghcide")
+               (setq lsp-haskell-process-path-hie "/home/phil/.local/bin/ghcide")
                (lsp))
-              ((equal haskell-init--ide-mode 'lsp) (lsp))
+              ((or (equal haskell-init--ide-mode 'hls)
+                   (not haskell-init--ide-mode)
+                   )
+               (setq lsp-haskell-process-path-hie "/home/phil/bin/haskell-language-server")
+               ;TODO: this is a workaround for flycheck error messages disappearing.
+               (setq lsp-diagnostic-clean-after-change nil)
+               (lsp))
+              ((equal haskell-init--ide-mode 'lsp) t)
               ((equal haskell-init--ide-mode 'hie)
                (lambda ()
                  (make-local-variable 'lsp-haskell-process-path-hie)
@@ -176,40 +194,6 @@
 
 
 (add-hook 'hack-local-variables-hook #'haskell-init--choose-ide-mode t)
-
-(defun intero-mode-init ()
-  "Initialization for Intero mode."
-  (require 'intero)
-  ;; (set (make-local-variable 'intero-mode) t) ;; Hack to make flycheck
-  ;; happy
-  (intero-mode t)
-  (require 'company)
-  (set (make-local-variable 'company-backends)
-       '(( company-intero
-           company-capf
-           company-dabbrev-code
-           )
-         company-files
-         ))
-  (company-mode nil)
-  (setq flycheck-checker nil)
-  (define-key intero-mode-map (kbd "C-c C-t") 'intero-type-at)
-  (define-key intero-mode-map (kbd "C-c t") 'intero-type-at)
-  (define-key intero-mode-map (kbd "C-c C-i") 'intero-info)
-  (define-key intero-mode-map (kbd "M-.") 'intero-goto-definition)
-  (define-key intero-mode-map (kbd "C-c C-l") (lambda () (interactive) (save-window-excursion
-                                                                         (haskell-process-save-current-window)
-                                                                         (haskell-clear-interactive-window)
-                                                                         (haskell-load-file))))
-  (define-key intero-mode-map (kbd "C-c C-c") nil)
-  (define-key intero-mode-map (kbd "C-c C-c C-f") '(lambda () (interactive (flycheck-buffer)
-                                                                           (flycheck-list-errors)
-                                                                           )))
-  (define-key intero-mode-map (kbd "C-c C-r") 'intero-apply-suggestions)
-  (define-key intero-mode-map (kbd "C-c C-e") 'intero-expand-splice-at-point)
-  (define-key intero-mode-map (kbd "C-c M-e") 'mc/mark-next-like-this)
-  (define-key intero-mode-map (kbd "C-c r") 'intero-restart)
-  )
 
 (defun haskell-mode-init ()
   "Custom initialization function for Haskell mode."
@@ -233,7 +217,6 @@
         )
 
   (diminish 'auto-revert-mode)
-  (diminish 'hindent-mode)
   (diminish 'yas-minor-mode)
   (diminish 'subword-mode)
 
@@ -253,8 +236,6 @@
   (define-key yas-minor-mode-map (kbd "M-<tab>") 'yas-expand)
 
   ;; (interactive-haskell-mode)
-
-  (hindent-mode t)
 
   (set (make-local-variable 'align-rules-list) nil)
   (add-to-list 'align-rules-list
@@ -312,7 +293,7 @@
                                                  (haskell-align-imports)
                                                  (haskell-sort-imports)
                                                  ))
-  (define-key haskell-mode-map (kbd "M-.")  'haskell-mode-jump-to-def-or-tag)
+  ;; (define-key haskell-mode-map (kbd "M-.")  'haskell-mode-jump-to-def-or-tag)
   (define-key haskell-mode-map (kbd "C-M-.")   'haskell-tag-find)
   ;; (define-key haskell-mode-map (kbd "C-M-.") 'haskell-mode-jump-to-def-or-tag)
   (define-key haskell-mode-map (kbd "M-]")   'align)
@@ -340,7 +321,8 @@
                                                    (flycheck-list-errors))
                                                (message "No errors.")
                                                ))
-  (define-key intero-mode-map (kbd "C-c C-e") 'mc/mark-next-like-this)
+  ;; (define-key intero-mode-map (kbd "C-c C-e") 'mc/mark-next-like-this)
+  (define-key lsp-mode-map (kbd "C-c e") 'lsp-treemacs-errors-list)
   )
 
 (add-hook 'haskell-mode-hook #'haskell-mode-init)
