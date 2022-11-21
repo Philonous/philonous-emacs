@@ -77,6 +77,7 @@
                        ("gadts" :language "GADTs")
                        ("lcase" :language "LambdaCase")
                        ("gnt" :language "GeneralizedNewtypeDeriving")
+                       ("i" "Data.String.Interpolate.IsString (i)" :language "QuasiQuotes")
                        ))
 
 (defun haskell-exists-import-line (line)
