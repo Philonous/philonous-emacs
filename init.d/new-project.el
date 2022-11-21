@@ -1,0 +1,1 @@
+/home/phil/projects/templates/new-project.el
