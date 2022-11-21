@@ -18,7 +18,6 @@
  '(git-gutter-fr:modified ((t (:background "#DC4CC3" :foreground "black" :weight bold))))
  '(hl-line ((t (:background "#424242"))))
  '(intero-debug-current-context ((t (:background "#301810"))))
- '(lsp-treemacs-file-error ((t (:inherit nil :foreground "tomato"))))
  '(magit-diff-add ((((class color) (background dark)) (:foreground "green"))))
  '(magit-diff-file-header ((t (:inherit magit-header :underline nil))))
  '(magit-diff-hunk-header ((t (:inherit magit-header :underline nil :slant italic))))
@@ -142,17 +141,178 @@
  '(ido-confirm-unique-completion t)
  '(intero-pop-to-repl nil)
  '(js-indent-level 2)
- '(lsp-haskell-server-path "/home/phil/bin/haskell-language-server")
+ '(lsp-haskell-formatting-provider "floskell")
+ '(lsp-haskell-plugin-import-lens-code-actions-on nil)
+ '(lsp-haskell-plugin-import-lens-code-lens-on nil)
+ '(lsp-haskell-server-path "haskell-language-server-wrapper")
+ '(lsp-lens-place-position 'above-line)
  '(lsp-ui-doc-position 'bottom)
  '(mode-line-percent-position nil)
- '(org-todo-keywords '((sequence "TODO" "WORKING" "|" "DONE")) t)
+ '(org-todo-keywords '((sequence "TODO" "WORKING" "|" "DONE")))
  '(package-selected-packages
-   '(lsp-python-ms treemacs undo-tree treemacs-magit docker-compose-mode strace-mode writegood writegood-mode hintent-mode font-lock-studio flycheck deadgrep haskell-mode swiper vagrant-tramp counsel origami origami-mode projectile forge cquery poe-lootfilter-mode diminish-mode diminish dap-ui dap-mode dap company-lsp git-gutter-fringe-mode git-gutter lsp-haskell lsp-ui lsp-mode lsp cargo-mode company-racer flycheck-rust-mode rust-mode auto-package-update dante direnv gitignore-mode which-key use-package php-mode elm-mode logstash-conf camcorder dashboard savekill async company dash dash-functional find-file-in-project git-commit helm-core highlight-indentation ht ido-completing-read+ ivy js2-mode julia-mode know-your-http-well magit marshal mmm-mode pyvenv s simple-httpd ssass-mode tern typescript-mode with-editor magit-find-file git-gutter+ git-timemachine company-nixos-options nix-mode nixos-options racer cargo flycheck-rust intero "hindent" "hindent-mode" ag rjsx-mode request js2-highlight-vars jsx-mode vue-html-mode vue-mode company-restclient restclient js-doc web-mode company-tern stan-mode stan-snippets company-auctex auctex ample-theme ample-zen-theme monokai-theme anti-zenburn-theme solarized-theme silkworm-theme ess gist py-autopep8 elpy zenburn-theme yasnippet yaml-mode yagist visible-mark ujelly-theme toml-mode tidy tide tern-auto-complete tagedit soft-stone-theme smex smartparens skewer-mode register-list rainbow-delimiters pov-mode peg paredit nodejs-repl multiple-cursors markdown-mode magit-tramp magit-filenotify lua-mode less-css-mode jist jdee interaction-log ido-vertical-mode ido-ubiquitous hindent highlight helm guru-mode groovy-mode git-gutter-fringe gh flymake-easy flx-ido fill-column-indicator f expand-region ecb-snapshot dockerfile-mode docker csv-mode cryptol-mode color-theme-tango color-theme-solarized color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized anything angular-snippets angular-mode ac-etags))
+   '(lsp-pyright smartparens-haskell lsp-python-ms treemacs undo-tree treemacs-magit docker-compose-mode strace-mode writegood writegood-mode hintent-mode font-lock-studio flycheck deadgrep haskell-mode swiper vagrant-tramp counsel origami origami-mode projectile forge cquery poe-lootfilter-mode diminish-mode diminish dap-ui dap-mode dap company-lsp git-gutter-fringe-mode git-gutter lsp-haskell lsp-ui lsp-mode lsp cargo-mode company-racer flycheck-rust-mode rust-mode auto-package-update dante direnv gitignore-mode which-key use-package php-mode elm-mode logstash-conf camcorder dashboard savekill async company dash dash-functional find-file-in-project git-commit helm-core highlight-indentation ht ido-completing-read+ ivy js2-mode julia-mode know-your-http-well magit marshal mmm-mode pyvenv s simple-httpd ssass-mode tern typescript-mode with-editor magit-find-file git-gutter+ git-timemachine company-nixos-options nix-mode nixos-options racer cargo flycheck-rust intero "hindent" "hindent-mode" ag rjsx-mode request js2-highlight-vars jsx-mode vue-html-mode vue-mode company-restclient restclient js-doc web-mode company-tern stan-mode stan-snippets company-auctex auctex ample-theme ample-zen-theme monokai-theme anti-zenburn-theme solarized-theme silkworm-theme ess gist py-autopep8 elpy zenburn-theme yasnippet yaml-mode yagist visible-mark ujelly-theme toml-mode tidy tide tern-auto-complete tagedit soft-stone-theme smex smartparens skewer-mode register-list rainbow-delimiters pov-mode peg paredit nodejs-repl multiple-cursors markdown-mode magit-tramp magit-filenotify lua-mode less-css-mode jist jdee interaction-log ido-vertical-mode ido-ubiquitous hindent highlight helm guru-mode groovy-mode git-gutter-fringe gh flymake-easy flx-ido fill-column-indicator f expand-region ecb-snapshot dockerfile-mode docker csv-mode cryptol-mode color-theme-tango color-theme-solarized color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized anything angular-snippets angular-mode ac-etags))
  '(racer-rust-src-path
    "/home/uart14/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src")
  '(rust-rustfmt-bin "rustfmt")
  '(safe-local-variable-values
    '((sql-connection-alist
+      ("avancera-app"
+       (sql-product 'postgres)
+       (sql-user "avancera-app")
+       (sql-server "localhost")
+       (sql-database "avancera-app")
+       (sql-port 5432))
+      ("auth-service"
+       (sql-product 'postgres)
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")
+       (sql-port 6432))
+      ("avancera-app_authservice-database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "avancera-app_auth-service-database_1")
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice"))
+      ("auth-service_database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "auth-service_database_1")
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")))
+     (sql-connection-alist
+      ("avancera-app"
+       (sql-product 'postgres)
+       (sql-user "avancera-app")
+       (sql-server "localhost")
+       (sql-database "avancera-app")
+       (sql-port 5432))
+      ("auth-service"
+       (sql-product 'postgres)
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice")
+       (sql-port 5432))
+      ("avancera-app_authservice-database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "avancera-app_auth-service-database_1")
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice"))
+      ("auth-service_database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "auth-service_database_1")
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")))
+     (lsp-haskell-server-path . "/home/phil/bin/haskell-language-server.local")
+     (lsp-haskell-server-path . "/home/phil/bin/haskell-language-server")
+     (sql-connection-alist
+      ("avancera-app"
+       (sql-product 'postgres)
+       (sql-user "avancera-app")
+       (sql-server "localhost")
+       (sql-database "avancera-app")
+       (sql-port 5432))
+      ("auth-service"
+       (sql-product 'postgres)
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice")
+       (sql-port 5435))
+      ("avancera-app_authservice-database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "avancera-app_auth-service-database_1")
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice"))
+      ("auth-service_database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "auth-service_database_1")
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")))
+     (sql-connection-alist
+      ("avancera-app"
+       (sql-product 'postgres)
+       (sql-user "avancera-app")
+       (sql-server "localhost")
+       (sql-database "avancera-app")
+       (sql-port 5432))
+      ("auth-service"
+       (sql-product 'postgres)
+       (sql-user "avancera-app")
+       (sql-server "localhost")
+       (sql-database "avancera-app")
+       (sql-port 5435))
+      ("avancera-app_authservice-database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "avancera-app_auth-service-database_1")
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice"))
+      ("auth-service_database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "auth-service_database_1")
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")))
+     (org-default-notes-file . "~/projects/nejla/app/notes.org")
+     (todo-directory . "~/projects/nejla/app/todo/")
+     (todo-directory . "~/projects/nejla/app/todo")
+     (todo-directory "~/projects/nejla/app/todo/")
+     (sql-connection-alist
+      ("avancera-app"
+       (sql-product 'postgres)
+       (sql-user "avancera-app")
+       (sql-server "localhost")
+       (sql-database "avancera-app")
+       (sql-port 5432))
+      ("avancera-app-auth-service"
+       (sql-product 'postgres)
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice")
+       (sql-port 5435))
+      ("avancera-app-test"
+       (sql-product 'postgres)
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")
+       (sql-port 5433)))
+     (sql-connection-alist
+      ("avancera-app"
+       (sql-product 'postgres)
+       (sql-user "avancera-app")
+       (sql-server "localhost")
+       (sql-database "avancera-app")
+       (sql-port 5432))
+      ("avancera-app_authservice-database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "avancera-app_auth-service-database_1")
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice"))
+      ("auth-service_database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "auth-service_database_1")
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")))
+     (sql-connection-alist
+      ("avancera-app_authservice-database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "avancera-app_auth-service-database_1")
+       (sql-user "authservice")
+       (sql-server "localhost")
+       (sql-database "authservice"))
+      ("auth-service_database_1"
+       (sql-product 'postgres-docker)
+       (sql-container "auth-service_database_1")
+       (sql-user "postgres")
+       (sql-server "localhost")
+       (sql-database "postgres")))
+     (sql-connection-alist
       ("avancera-app_authservice-database_1"
        (sql-product 'postgres)
        (sql-user "avancera-app")

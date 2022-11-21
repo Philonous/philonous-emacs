@@ -58,6 +58,8 @@
 (global-set-key (kbd "<f11>") 'split-windows-threeway)
 (global-set-key (kbd "C-c p") 'check-parens)
 (global-set-key (kbd "C-c d") 'duplicate-line-or-region)
+(global-set-key (kbd "C-c t") 'open-project-todo)
+(global-set-key (kbd "C-c q") 'bury-buffer)
 
 (use-package expand-region
   :bind ("M-e" . 'er/expand-region))
@@ -75,7 +77,9 @@
   :diminish git-gutter-mode
   )
 
-(use-package gitignore-mode)
+;;; Unavablable
+;; (use-package gitignore-mode)
+
 
 (use-package direnv
   :pin melpa
@@ -84,12 +88,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;
 
-(use-package ivy
-  :pin melpa-stable
-  :config
-  (ivy-mode t)
-  :diminish
-  )
+;; (use-package ivy
+;;   :pin melpa-stable
+;;   :config
+;;   (ivy-mode t)
+;;   :diminish
+;;   :config
+;;   (define-key ivy-mode-map (kbd "C-j") #'ivy-immediate-done)
+;;   )
 
 (use-package swiper
   :pin melpa-stable
@@ -112,6 +118,7 @@
   :bind ("∈" . 'company-complete)
   :config
   (global-company-mode)
+  (setq company-idle-delay nil)
   :diminish company-mode
   )
 

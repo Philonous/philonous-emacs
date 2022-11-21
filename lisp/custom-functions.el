@@ -334,19 +334,29 @@ C-u 0 M-x enumerate-rectangle"
   (let ((parts (split-string module-name "[.]")))
   (mapconcat (lambda (str) (substring str 0 1)) parts ""))):
 
-(defun underscore-to-camelcase ()
+(defun underscore-to-camelcase (rbeg rend)
   "Convert underscores to camelCase"
-  (interactive)
-  (destructuring-bind (beg . end) (bounds-of-thing-at-point 'word)
+  (interactive "r")
+  (destructuring-bind (beg . end)
+      (if (use-region-p)
+          (cons rbeg rend)
+        (bounds-of-thing-at-point 'symbol))
     (goto-char beg)
-    (while (re-search-forward "_\\([a-z]\\)" end t)
-      (replace-match (upcase (match-string 1))))))
+    (if (looking-at "\\([[:alnum:]]+\\)_")
+        (progn
+          (replace-match (concat (s-downcase (match-string 1)) "_") t)
+          (goto-char beg)
+          (while (re-search-forward "_\\([[:alnum:]]+\\)" end t)
+            (replace-match (s-capitalize (match-string 1)) t)))))
+  )
 
-(defun camelcase-to-underscore ()
+
+(defun camelcase-to-underscore (rbeg rend)
   "Convert underscores to camelCase"
-  (interactive)
+  (interactive "r")
   (let ((case-fold-search nil))
-    (destructuring-bind (beg . end) (bounds-of-thing-at-point 'word)
+    (destructuring-bind (beg . end)
+        (if (use-region-p) (cons rbeg rend) (bounds-of-thing-at-point 'symbol))
       (goto-char beg)
       (while (re-search-forward "\\([a-z0-9]\\)\\([A-Z]\\)" end t)
         (replace-match (concat (match-string-no-properties 1)
@@ -455,9 +465,7 @@ and the other way around otherwise"
   "Clear the interactive window"
   (interactive)
   (require 'comint)
-  (delete-region (point-min) (point-max))
-  (comint-send-input)
-  )
+  (comint-clear-buffer))
 
 (defun switch-to-previous-buffer ()
   "Switch to previously open buffer.
@@ -473,22 +481,32 @@ Repeated invocations toggle between the two most recently open buffers."
     (save-excursion
       (insert region-text))))
 
-(defun duplicate-line ()
-  (interactive)
+(defun duplicate-line (&optional prefix)
+  (interactive "p")
   (save-excursion  (let* ((line (buffer-substring (line-beginning-position) (line-end-position))))
                      (end-of-line)
-                     (insert "\n")
-                     (insert line)
+                     (loop for i from 1 upto (max 1 prefix)
+                           do (progn (insert "\n")
+                                     (insert line))
+                     )
                      ))
   (next-line)
   )
 
 (defun duplicate-line-or-region ()
   (interactive)
-  (if (region-active-p) (duplicate-region) (duplicate-line)))
+  (if (region-active-p)
+      (call-interactively 'duplicate-region)
+    (call-interactively 'duplicate-line)))
 
 (defun open-with (program)
   (interactive "MProgram: ")
   (call-process program nil nil nil buffer-file-name))
 
 (provide 'custom-functions)
+
+(defun open-project-todo ()
+  (interactive)
+  (let ((dir (or (locate-dominating-file default-directory "TODO.org")
+                 (projectile-project-root))))
+    (find-file-other-window (concat dir "/" "TODO.org"))))

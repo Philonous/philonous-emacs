@@ -1,5 +1,6 @@
 (require 'custom-functions)
 (require 'haskell-import)
+(require 'persistent-mode)
 ;; (require 'haskell-cabal)
 
 ;; (require 'intero-debug)
@@ -16,10 +17,12 @@
 ;;   :hook ((haskell-mode . flycheck-mode)
 ;;          (haskell-mode . dante-mode)))
 
-(use-package intero)
 
 (use-package flycheck
   :pin melpa
+  :config
+  (setq flycheck-navigation-minimum-level 'error)
+  (define-key flycheck-mode-map (kbd "C-c C-e") 'flycheck-explain-error-at-point)
   )
 
 ;; (setq flycheck-check-syntax-automatically '(save mode-enabled)) ;; LSP
@@ -34,10 +37,6 @@
  ;; Comment/uncomment this line to see interactions between lsp client/server.
  (setq lsp-log-io nil)
  :bind
- (:map lsp-mode-map
-       ("M-." . xref-find-definitions)
-       ("C-c C-a" . lsp-execute-code-action)
-       )
  )
 
 (use-package hindent
@@ -169,14 +168,16 @@
         (cond ((equal haskell-init--ide-mode 'intero) (intero-mode t))
               ((equal haskell-init--ide-mode 'ghcide)
                (setq lsp-haskell-process-path-hie "/home/phil/.local/bin/ghcide")
-               (lsp))
+               (lsp)
+               )
               ((or (equal haskell-init--ide-mode 'hls)
                    (not haskell-init--ide-mode)
                    )
                (setq lsp-haskell-process-path-hie "/home/phil/bin/haskell-language-server")
                ;TODO: this is a workaround for flycheck error messages disappearing.
-               (setq lsp-diagnostic-clean-after-change nil)
-               (lsp))
+               ;; (setq lsp-diagnostic-clean-after-change nil)
+               (lsp)
+               )
               ((equal haskell-init--ide-mode 'lsp) t)
               ((equal haskell-init--ide-mode 'hie)
                (lambda ()
@@ -185,6 +186,7 @@
                  (make-local-variable lsp-haskell-process-args-hie)
                  (setq lsp-haskell-process-args-hie '())
                  (lsp)
+                 (lsp-lens-mode)
                  ))
               ((eq haskell-init--ide-mode 'none) t)
               ;; If no mode is explicitly set, we try to guess one
@@ -346,3 +348,10 @@
   (define-key origami-mode-map (kbd "C-c @ a") 'origami-open-all-nodes)
   (define-key origami-mode-map (kbd "C-c @ d") 'origami-close-all-nodes)
   )
+
+(defun c2hs-mode-init ()
+  (interactive)
+  (define-key haskell-c2hs-mode-map (kbd "C-c c") #'underscore-to-camelcase)
+  )
+
+(add-hook 'haskell-c2hs-mode-hook #'c2hs-mode-init)

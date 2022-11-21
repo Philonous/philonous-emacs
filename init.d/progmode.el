@@ -3,11 +3,23 @@
   :commands lsp
   :hook ((rust-mode . lsp)
          ;; (haskell-mode . lsp)
-         ))
+         )
+  :bind
+    (("M-." . xref-find-definitions)
+     ("C-c C-a C-a" . lsp-execute-code-action)
+     ("C-c C-a C-l" . lsp-avy-lens)
+     )
+  :config
+  (setq gc-cons-threshold 10000000)
+  (setq read-process-output-max (* 1024 1024))
+  (setq lsp-log-io nil)
+  )
 
 (use-package lsp-ui :pin melpa :commands lsp-ui-mode)
 ;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-(use-package company-lsp)
+
+;;; Unavailable
+;; (use-package company-lsp)
 
 (use-package dap-mode)
 
@@ -52,3 +64,9 @@
 (define-key occur-mode-map (kbd "p") #'occur-prev)
 
 (define-key prog-mode-map (kbd "C-c o") #'occur-dwim)
+
+(define-key prog-mode-map (kbd "M-.") #'xref-find-definitions)
+
+
+(use-package ansi-color
+    :hook (compilation-filter . ansi-color-compilation-filter))
