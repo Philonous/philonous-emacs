@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (let ((pg-site-file
        (substitute-in-file-name
         "$HOME/.emacs.d/other-packages/ProofGeneral/generic/proof-site.el")))

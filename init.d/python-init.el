@@ -1,9 +1,4 @@
-;; (setenv "PYTHONPATH" "/usr/lib/python2.7/site-packages")
-;; (setq
-;;  python-shell-interpreter "python3"
-;;  python-shell-interpreter-args ""
-;;  python-shell-prompt-regexp ">>> ")
-
+;;; -*- lexical-binding: t; -*-
 
 (defun python--go-to-python-window ()
   (interactive)
@@ -21,21 +16,17 @@
   (if source-buffer
       (select-window source-buffer)))
 
-(defun python-mode-init ()
-  ""
-  (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
-  (setq-default  python-shell-interpreter "python3")
-  (define-key python-mode-map (kbd "M-`") 'python--go-to-python-window)
-  (define-key inferior-python-mode-map (kbd "M-`") 'python--return-to-source-window)
-  (define-key inferior-python-mode-map (kbd "C-c C-k") 'comint-clear-buffer)
-  (define-key python-mode-map (kbd "M-q") 'lsp-format-buffer)
-  ;; (lsp)
+(use-package python
+  :custom
+  (python-shell-interpreter "python3")
+  :bind (:map python-mode-map
+              ("M-`" . python--go-to-python-window)
+              ;; ("M-q" . lsp-format-buffer)
+              :map inferior-python-mode-map
+              ("M-`" . python--return-to-source-window)
+              ("C-c C-k" . comint-clear-buffer))
   )
 
-(setq python-mode-hook 'python-mode-init)
-
-
-(use-package lsp-pyright)
 
 ;; (defun elpy-mode-init ()
 ;;   (py-autopep8-enable-on-save)

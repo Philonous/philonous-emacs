@@ -1,60 +1,45 @@
-;; packages
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.
-(require 'package)
-
+;; init.el -*- lexical-binding: t -*-
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")
-			 ))
+                         ))
+(setq use-package-always-ensure t)
 
-(package-initialize)
-(setq package-enable-at-startup nil)
-
-(unless package-archive-contents
-  (message "refreshing package contents")
-  (package-refresh-contents))
-
-(unless (package-installed-p 'use-package)
-  (message "installing use-package")
-  (package-install 'use-package))
+;; (unless package-archive-contents
+;;   (message "refreshing package contents")
+;;   (package-refresh-contents))
 
 (setq use-package-always-pin "melpa")
 (setq package-archive-priorities
-      '(("melpa-stable" . 20)
-        ("gnu" . 10)
-        ("melpa" . 0)))
+      '(("melpa" . 20)
+        ("melpa-stable" . 10)
+        ("gnu" . 1)
+        ))
 
-;; (setq auto-package-update-delete-old-versions t)
+(use-package auto-compile
+  :config
+  (auto-compile-on-load-mode +1)
+  (auto-compile-on-save-mode +1))
 
-(defun load-inits ()
-  (let ((init-files (directory-files (expand-file-name "init.d" user-emacs-directory) t "\.el$") ))
-    (mapc 'load init-files)))
+(let ((default-directory (expand-file-name "lisp" user-emacs-directory))) (normal-top-level-add-subdirs-to-load-path))
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "init.d" user-emacs-directory))
+(require 'custom-functions)
 
-(add-hook
- 'after-init-hook
- (lambda ()
-   ;; load path
-   (add-to-list 'load-path "~/.emacs.d/lisp")
-   (add-to-list 'load-path "~/.emacs.d/init.d")
-   (add-to-list 'load-path "~/.emacs.d/custom-packages")
-   ;; (add-to-list 'load-path "~/.emacs.d/other-packages")
-   (require 'custom-functions)
-   (add-subdirs-to-load-path "~/.emacs.d/custom-packages")
-   ;; (add-subdirs-to-load-path "~/.emacs.d/other-packages")
-
-   ;; initialize use-package
-   (eval-when-compile (require 'use-package))
-   (setq use-package-always-ensure t)
-   ;; (use-package auto-package-update)
-   ;; Load every *.el file in init.d in lexicographical order
-   (load-inits)
-
-   )) ;; after-init-hook
+(eval-when-compile (require 'use-package))
 
 
-(setq custom-file "~/.emacs.d/custom.el")
+(let ((init-files (directory-files (expand-file-name "init.d" user-emacs-directory) t "\\.el\\'")))
+  (mapc (lambda (f)
+          (let ((start (current-time)))
+            (load (file-name-sans-extension f))
+            (message "%s: %.2fs"
+                     (file-name-nondirectory f)
+                     (float-time (time-subtract (current-time) start)))))
+        init-files))
+
+
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 (put 'dired-find-alternate-file 'disabled nil)

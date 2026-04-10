@@ -1,4 +1,5 @@
-;;; persistent-mode.el --- major mode for haskell persistent schema declarations  -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t; -*-
+;;; persistent-mode.el --- major mode for haskell persistent schema declarations 
 
 (eval-when-compile
   (require 'rx))

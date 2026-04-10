@@ -1,37 +1,58 @@
-(use-package lsp-mode
-  :pin melpa
-  :commands lsp
-  :hook ((rust-mode . lsp)
-         ;; (haskell-mode . lsp)
-         )
+;;; -*- lexical-binding: t; -*-
+;; (use-package lsp-mode
+;;   :commands lsp
+;;   :hook ((rust-mode . lsp)
+;;          ;; haskell-mode handles its own hook
+;;          )
+;;   :bind
+;;   (:map lsp-mode-map
+;;         ("M-." . xref-find-definitions)
+;;         ("C-c C-a C-a" . lsp-execute-code-action)
+;;         ("C-c C-a C-l" . lsp-avy-lens)
+;;         ("C-c C-q" . lsp-format-buffer)
+;;         )
+;;   :config
+;;   (setq gc-cons-threshold 10000000)
+;;   (setq read-process-output-max (* 1024 1024))
+;;   (setq lsp-log-io nil)
+;;   (setq lsp-auto-execute-action nil)    ; Always select actions before executing
+;;   :custom
+;;   (lsp-ui-sideline-enable nil)
+;;   :diminish lsp-lens-mode
+;;   )
+
+;; (use-package lsp-ui :commands lsp-ui-mode)
+
+(use-package apheleia)
+
+(use-package eglot
   :bind
-    (("M-." . xref-find-definitions)
-     ("C-c C-a C-a" . lsp-execute-code-action)
-     ("C-c C-a C-l" . lsp-avy-lens)
-     )
+  (:map eglot-mode-map
+        ("C-c C-a C-a" . eglot-code-actions)
+        ("C-c C-q" . eglot-format-buffer)
+        )
+  )
+
+(use-package flymake
+  :bind
+  (:map flymake-mode-map
+        ("C-c ! p" . flymake-goto-prev-error)
+        ("C-c ! n" . flymake-goto-next-error)
+        ("C-c ! e" . flymake-show-project-diagnostics)
+        )
   :config
-  (setq gc-cons-threshold 10000000)
-  (setq read-process-output-max (* 1024 1024))
-  (setq lsp-log-io nil)
-  )
 
-(use-package lsp-ui :pin melpa :commands lsp-ui-mode)
-;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+  ;;
 
-;;; Unavailable
-;; (use-package company-lsp)
+  (defun my/flymake-set-faces ()
+    "Set flymake faces blended against the current theme background."
+    (my/set-error-face 'flymake-error   "red"    0.02)
+    (my/set-error-face 'flymake-warning "orange" 0.02)
+    (my/set-error-face 'flymake-note    "blue"   0.02))
 
-(use-package dap-mode)
+  (my/flymake-set-faces)
+  (advice-add 'load-theme :after (lambda (&rest _) (my/flymake-set-faces))))
 
-(use-package smartparens
-  :hook ((haskell-mode rust-mode nix-mode)
-         . smartparens-mode)
-  :diminish
-  )
-
-(use-package fill-column-indicator
-  :hook
-  prog-mode-hook)
 
 (add-hook 'prog-mode-hook #'column-number-mode)
 
@@ -45,7 +66,7 @@
                  (thing-at-point 'word))))
     (if here
         (funcall-interactively #'occur here)
-        (call-interactively #'occur))))
+      (call-interactively #'occur))))
 
 ;; (defun occur-dwim ()
 ;;   "Call `occur' with a sane default."
@@ -69,4 +90,23 @@
 
 
 (use-package ansi-color
-    :hook (compilation-filter . ansi-color-compilation-filter))
+  :hook (compilation-filter . ansi-color-compilation-filter))
+
+(setq executable-prefix-env t)
+
+(use-package compile
+  :custom
+  (compilation-auto-jump-to-first-error 'first-error)
+  (compilation-scroll-output 'first-error)
+  (compilation-always-kill t))
+
+(use-package project
+  :config
+  (defun my/project-compile ()
+    (interactive)
+    (let ((buf (call-interactively #'project-compile)))
+      (when-let* ((win (get-buffer-window buf)))
+        (select-window win))))
+  :bind
+  (:map project-prefix-map
+        ("c" . my/project-compile)))

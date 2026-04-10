@@ -1,3 +1,10 @@
+;;; -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'thingatpt)
+(require 'comint)
+(require 'color)
+
 (defun add-subdirs-to-load-path (dir)
   "Read subdirectories and prepend them to load-path"
   (let* ((base-dir (file-name-as-directory dir))
@@ -16,17 +23,17 @@
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
-  ((let ((name (buffer-name))
-    (filename (buffer-file-name)))
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
     (if (not filename)
-    (message "Buffer '%s' is not visiting a file!" name)
+        (message "Buffer '%s' is not visiting a file!" name)
       (if (get-buffer new-name)
-      (message "A buffer named '%s' already exists!" new-name)
-    (progn
-      (rename-file name new-name 1)
-      (rename-buffer new-name)
-      (set-visited-file-name new-name)
-      (set-buffer-modified-p nil)))))))
+          (message "A buffer named '%s' already exists!" new-name)
+        (progn
+          (rename-file name new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil))))))
 
 (defun increment-number-at-point ()
   (interactive)
@@ -52,12 +59,13 @@
 (defvar enumerate-line-num)
 (defun enumerate-line (start end fmt)
   (string-rectangle-line start end (format fmt enumerate-line-num) t)
-  (incf enumerate-line-num))
+  (cl-incf enumerate-line-num))
 (defun enumerate-rectangle (start end &optional first-number)
-  "Replace the region-rectangle with numbers beginning at 1 and incrementing for each line.
+  "Replace the region-rectangle with numbers beginning at 1 and
+incrementing for each line.
 
-You can use the universal argument to change the initial value.
-For example, to start counting lines at zero:
+You can use the universal argument to change the initial value.  For
+example, to start counting lines at zero:
 
 C-u 0 M-x enumerate-rectangle"
   (interactive "*r\np")
@@ -68,7 +76,7 @@ C-u 0 M-x enumerate-rectangle"
       (setq line0 (line-number-at-pos))
       (goto-char end)
       (setq lineN (line-number-at-pos)))
-    (setq fmt (concatenate 'string
+    (setq fmt (cl-concatenate 'string
                            "%"
                            (format "%0d" (string-width (format "%0d" (+ enumerate-line-num (- lineN line0)))))
                            ".1d"))
@@ -89,6 +97,20 @@ C-u 0 M-x enumerate-rectangle"
                        (search-forward (char-to-string char) nil nil arg)
                      (backward-char direction))
                    (point)))))
+
+(defun jump-to-char (arg char)
+  "Kill up to, but not including ARGth occurrence of CHAR.
+ Case is ignored if `case-fold-search' is non-nil in the current buffer.
+ Goes backward if ARG is negative; error if CHAR not found.
+ Ignores CHAR at point."
+  (interactive "p\ncJump to char: ")
+  (let ((direction (if (>= arg 0) 1 -1)))
+    (forward-char direction)
+    (unwind-protect
+        (search-forward (char-to-string char) nil nil arg)
+      (backward-char direction))
+    (point)))
+
 ;; Haskell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -103,34 +125,42 @@ C-u 0 M-x enumerate-rectangle"
 (defun layout-for-haskell ()
   (interactive)
   (save-selected-window
-  (let ((haskell-buffer (get-haskell-buffer)))
-  (progn
-  (mapc 'delete-window (get-buffer-window-list haskell-buffer))
-  (let ((buffer-next-window (window-buffer (next-window))))
-  (progn
-    (delete-other-windows)
-    (let* ((right-window (split-window-right -80))
-           (haskell-window (split-window-below -20))
-           (middle-window (split-window-right 80)))
+    (let ((haskell-buffer (get-haskell-buffer)))
       (progn
-        (set-window-buffer haskell-window haskell-buffer )
-        (set-window-dedicated-p haskell-window t )
-        (set-window-parameter haskell-window 'no-other-window t)
-        (set-window-buffer right-window buffer-next-window )))))))))
+        (mapc 'delete-window (get-buffer-window-list haskell-buffer))
+        (let ((buffer-next-window (window-buffer (next-window))))
+          (progn
+            (let ((ignore-window-parameters t)) delete-other-windows)
+            (let* ((right-window (split-window-right -80))
+                   (haskell-window (split-window-below -20))
+                   (_middle-window (split-window-right 80)))
+              (progn
+                (set-window-buffer haskell-window haskell-buffer )
+                (set-window-dedicated-p haskell-window t )
+                (set-window-parameter haskell-window 'no-other-window t)
+                (set-window-buffer right-window buffer-next-window )))))))))
 
 (defun split-windows-threeway ()
-    (interactive)
-    (let ((buffer-next-window (window-buffer (next-window)))
-          (buffer-previous-window (window-buffer (previous-window)))
-          )
-      (progn
-        (delete-other-windows)
-        (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
-               (middle-window (split-window-right)))
-          (set-window-buffer (selected-window) buffer-previous-window)
-          (set-window-buffer right-window buffer-next-window)
-          (select-window middle-window)
-          ))))
+  (interactive)
+  (let ((buffer-next-window (window-buffer (next-window)))
+        (buffer-previous-window (window-buffer (previous-window)))
+        )
+    (progn
+      (let ((ignore-window-parameters t)) (delete-other-windows))
+      (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
+             (middle-window (split-window-right)))
+        (set-window-buffer (selected-window) buffer-previous-window)
+        (set-window-buffer right-window buffer-next-window)
+        (select-window middle-window)
+        ))))
+
+(defun my/display-in-compile-target-window (buffer alist)
+  "Display BUFFER in the window tagged with the `compile-window' parameter."
+  (let ((win (cl-find-if
+              (lambda (w) (window-parameter w 'compile-window))
+              (window-list))))
+    (when win
+      (window--display-buffer buffer win 'reuse alist))))
 
 (defun layout-for-haskell2 ()
   "3-column layout for 4k screen"
@@ -143,16 +173,17 @@ C-u 0 M-x enumerate-rectangle"
           (progn
             (delete-other-windows)
             (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
-                   (middle-window (split-window-right))
+                   (_middle-window (split-window-right))
                    (haskell-window (split-window-below -20))
                    (compile-window (with-selected-window right-window
                                      (split-window-below -20))))
               (progn
                 (set-window-buffer haskell-window haskell-buffer )
-                (set-window-dedicated-p haskell-window t )
+                (set-window-dedicated-p haskell-window t)
                 (with-selected-window compile-window
-                  (switch-to-buffer "*haskell-compilation*")
-                  (set-window-dedicated-p compile-window t ))
+                  (switch-to-buffer "*compile*")
+                  (set-window-dedicated-p compile-window 'soft)
+                  (set-window-parameter compile-window 'compile-window t))
                 (set-window-parameter haskell-window 'no-other-window t)
                 (set-window-buffer right-window buffer-next-window )))))))))
 
@@ -185,21 +216,6 @@ C-u 0 M-x enumerate-rectangle"
      ((string= hostname "blackbird") (layout-for-haskell-blackbird))
      ((string= hostname "tukan") (layout-for-haskell2))
      (t (layout-for-haskell2)))))
-
-(defun haskell-tag-find (ident &optional next-p)
-  "Jump to tag"
-  (interactive "MIdentifier to jump to: ")
-  (let ((tags-file-dir (haskell-cabal--find-tags-dir))
-        (tags-revert-without-query t))
-    (when (and ident
-               (not (string= "" (haskell-string-trim ident)))
-               tags-file-dir)
-      (let ((tags-file-name (concat tags-file-dir "TAGS")))
-        (cond ((file-exists-p tags-file-name)
-               (let ((xref-prompt-for-identifier next-p))
-                 (xref-find-definitions ident)))
-              (t (haskell-mode-generate-tags ident)))))))
-
 
 ;; (defun layout-for-haskell ()
 ;;   (interactive)
@@ -254,44 +270,28 @@ C-u 0 M-x enumerate-rectangle"
                        (let ((inhibit-read-only t))
                          (erase-buffer))))))
 
-;; (defadvice haskell-interactive-mode-reset-error (after clear-process-log activate)
-;;   "clear the haskell process log when resetting errors"
-;;   (haskell-clear-process-log))
-
-(defun send-text-to-haskell-process ()
-  "Send the current line to the haskell process."
-  (interactive)
-  (let (pos1 pos2 bds)
-    (if (region-active-p)
-        (setq pos1 (region-beginning) pos2 (region-end))
-        (progn
-          (let ((bds (bounds-of-thing-at-point 'line)))
-            (setq pos1 (car bds) pos2 (cdr bds)))))
-    (haskell-process-do-simple-echo (buffer-substring-no-properties pos1 pos2)
-                                    'haskell-mode)))
-
 (defun flysspell-region-or-buffer ()
   "run flyspell-region when region is active and flyspell-buffer otherwise"
   (interactive)
   (if (region-active-p)
       (let ((pos1 (region-beginning)) (pos2 (region-end)))
-            (flyspell-region pos1 pos2))
-      (flyspell-buffer)))
+        (flyspell-region pos1 pos2))
+    (flyspell-buffer)))
 
 (defun downcase-word-or-region ()
   "Downcase current word or region."
-(interactive)
-(let (pos1 pos2 bds)
-  (if (region-active-p)
-     (setq pos1 (region-beginning) pos2 (region-end))
-    (progn
-      (setq bds (bounds-of-thing-at-point 'symbol))
-      (setq pos1 (car bds) pos2 (cdr bds))))
+  (interactive)
+  (let (pos1 pos2 bds)
+    (if (region-active-p)
+        (setq pos1 (region-beginning) pos2 (region-end))
+      (progn
+        (setq bds (bounds-of-thing-at-point 'symbol))
+        (setq pos1 (car bds) pos2 (cdr bds))))
 
-  ;; now, pos1 and pos2 are the starting and ending positions of the
-  ;; current word, or current text selection if exist.
-  (downcase-region pos1 pos2)
-  ))
+    ;; now, pos1 and pos2 are the starting and ending positions of the
+    ;; current word, or current text selection if exist.
+    (downcase-region pos1 pos2)
+    ))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -317,8 +317,8 @@ C-u 0 M-x enumerate-rectangle"
 (defun downcase-rectangle-line (startcol endcol)
   (when (= (move-to-column startcol) startcol)
     (downcase-region (point)
-                   (progn (move-to-column endcol 'coerce)
-                          (point)))))
+                     (progn (move-to-column endcol 'coerce)
+                            (point)))))
 
 (defun revert-all-buffers ()
   "Refreshes all open buffers from their respective files."
@@ -332,48 +332,51 @@ C-u 0 M-x enumerate-rectangle"
 
 (defun abbreviate-module (module-name)
   (let ((parts (split-string module-name "[.]")))
-  (mapconcat (lambda (str) (substring str 0 1)) parts ""))):
+    (mapconcat (lambda (str) (substring str 0 1)) parts ""))):
 
 (defun underscore-to-camelcase (rbeg rend)
   "Convert underscores to camelCase"
   (interactive "r")
-  (destructuring-bind (beg . end)
-      (if (use-region-p)
-          (cons rbeg rend)
-        (bounds-of-thing-at-point 'symbol))
+  (let* ((bounds (if (use-region-p)
+                     (cons rbeg rend)
+                   (bounds-of-thing-at-point 'symbol)))
+         (beg (car bounds))
+         (end (cdr bounds)))
     (goto-char beg)
     (if (looking-at "\\([[:alnum:]]+\\)_")
         (progn
-          (replace-match (concat (s-downcase (match-string 1)) "_") t)
+          (replace-match (concat (downcase (match-string 1)) "_") t)
           (goto-char beg)
           (while (re-search-forward "_\\([[:alnum:]]+\\)" end t)
-            (replace-match (s-capitalize (match-string 1)) t)))))
-  )
-
+            (replace-match (s-capitalize (match-string 1)) t))))))
 
 (defun camelcase-to-underscore (rbeg rend)
   "Convert underscores to camelCase"
   (interactive "r")
-  (let ((case-fold-search nil))
-    (destructuring-bind (beg . end)
-        (if (use-region-p) (cons rbeg rend) (bounds-of-thing-at-point 'symbol))
-      (goto-char beg)
-      (while (re-search-forward "\\([a-z0-9]\\)\\([A-Z]\\)" end t)
-        (replace-match (concat (match-string-no-properties 1)
+  (let* ((case-fold-search nil)
+         (bounds (if (use-region-p) (cons rbeg rend) (bounds-of-thing-at-point 'symbol)))
+         (beg (car bounds))
+         (end (cdr bounds)))
+    (goto-char beg)
+    (while (re-search-forward "\\([a-z0-9]\\)\\([A-Z]\\)" end t)
+      (replace-match (concat (match-string-no-properties 1)
                              "_"
-                             (downcase (match-string-no-properties 2))))))))
+                             (downcase (match-string-no-properties 2)))))))
 
-(defun swap-underscore-camelcase ()
+(defun swap-underscore-camelcase (rbeg rend)
   "convert udnerscores to camelCase if word contains underscores
 and the other way around otherwise"
-  (interactive)
+  (interactive "r")
   (save-excursion
-    (destructuring-bind (beg . end) (bounds-of-thing-at-point 'word)
+    (let* ((case-fold-search nil)
+           (bounds (if (use-region-p) (cons rbeg rend) (bounds-of-thing-at-point 'symbol)))
+           (beg (car bounds))
+           (end (cdr bounds)))
       (goto-char beg)
       (cond
        ((save-excursion (re-search-forward "_" end t))
-        (underscore-to-camelcase))
-       (t (camelcase-to-underscore))))))
+        (underscore-to-camelcase beg end))
+       (t (camelcase-to-underscore beg end))))))
 
 (defun smart-hyphen (n)
   "Capitalize the next word, or behave as the usual '-'."
@@ -405,18 +408,8 @@ and the other way around otherwise"
     (concat (upcase (substring str 0 1)) (substring str 1))))
 
 
-(defun byte-compile-reload-dir ()
-  "Byte-compile and reload everything."
-  (interactive)
-  (let ((byte-compile-warnings '(free-vars unresolved callargs redefine make-local mapcar constants suspicious)))
-    (loop for file in (directory-files (file-name-directory (or load-file-name
-                                                                (buffer-file-name)))
-                                       nil
-                                       "^[a-z0-9-]+\\.el$")
-          do (byte-recompile-file file t 0 t))))
-
 (defun fill-hyphens (n)
-  (dotimes (i n) (insert "-")))
+  (dotimes (_i n) (insert "-")))
 
 (defun section-heading ()
   (interactive)
@@ -429,20 +422,19 @@ and the other way around otherwise"
     (end-of-line)
     (let* ((hyphens (- 80 (current-column))))
       (fill-hyphens hyphens))
-    (previous-line)
+    (forward-line -1)
     (beginning-of-line)
     (unless (looking-at "--[-]*$")
       (end-of-line)
       (newline)
       (fill-hyphens 80))
     (forward-line 2)
-    (when (and (eobp) (not (= (current-column) 0)) (newline)))
+    (when (and (eobp) (not (= (current-column) 0))) (newline))
     (beginning-of-line)
     (unless (looking-at "--[-]*$")
       (open-line 1)
       (fill-hyphens 80))
-    (previous-line)
-    ))
+    (forward-line -1)))
 
 
 (defun haskell-find-definition-at-point ()
@@ -457,8 +449,8 @@ and the other way around otherwise"
     (if (string-match "[^-]*-- Defined at \\([^:]+\\):.*" response)
         ;; (find-file (match-string 1 response)
         (message response)
-        )
-      ))
+      )
+    ))
 
 
 (defun comint-clear-interactive-buffer ()
@@ -485,12 +477,12 @@ Repeated invocations toggle between the two most recently open buffers."
   (interactive "p")
   (save-excursion  (let* ((line (buffer-substring (line-beginning-position) (line-end-position))))
                      (end-of-line)
-                     (loop for i from 1 upto (max 1 prefix)
-                           do (progn (insert "\n")
-                                     (insert line))
-                     )
+                     (cl-loop for i from 1 upto (max 1 prefix)
+                              do (progn (insert "\n")
+                                        (insert line))
+                              )
                      ))
-  (next-line)
+  (forward-line)
   )
 
 (defun duplicate-line-or-region ()
@@ -510,3 +502,68 @@ Repeated invocations toggle between the two most recently open buffers."
   (let ((dir (or (locate-dominating-file default-directory "TODO.org")
                  (projectile-project-root))))
     (find-file-other-window (concat dir "/" "TODO.org"))))
+
+(defcustom curl-to-python-command "~/.local/bin/curlconverter --language python -"
+  "Command to convert curl to python"
+  :type 'string
+  :group 'python
+  )
+
+(defun curl-to-python--region (beg end)
+  (let* ((str (buffer-substring-no-properties beg end)))
+    (with-temp-buffer
+      (insert str)
+
+      ;; Fix bash multi-line constructs
+      (goto-char (point-min))
+      (while (re-search-forward "\\\\\n[ ]*" nil t) (replace-match " "))
+
+      (shell-command-on-region (point-min) (point-max) curl-to-python-command nil t
+                               (get-buffer-create "*curl2python: error*") t)
+
+      ;; Strip "import" statements
+      (goto-char (point-min))
+      (flush-lines "^import")
+
+      ;; Remove preceding empty lines left over from removing imports
+      (goto-char (point-min))
+      (if (looking-at "[ \t\n]*\n")
+          (replace-match ""))
+
+      (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun curl-to-python ()
+  (interactive)
+  (let* ((reg (if (region-active-p)
+                  (list (region-beginning) (region-end))
+                (list (line-beginning-position) (line-end-position))
+                ))
+         (beg (car reg))
+         (end (cadr reg))
+         (res (curl-to-python--region beg end))
+         )
+    (goto-char end)
+    (insert "\n")
+    (save-excursion
+      (comment-region beg end))
+    (insert res))
+  )
+
+(defun my/blend-colors (c1 c2 alpha)
+  "Blend C1 into C2 with ALPHA (0.0–1.0)."
+  (let ((rgb1 (color-name-to-rgb c1))
+        (rgb2 (color-name-to-rgb c2)))
+    (apply #'color-rgb-to-hex
+           (cl-mapcar (lambda (a b) (+ (* alpha a) (* (- 1.0 alpha) b)))
+                      rgb1 rgb2))))
+
+(defun my/set-error-face (face color alpha &optional style)
+  "Set FACE to a wave underline in COLOR with background blended at ALPHA.
+STYLE defaults to `wave'."
+  (let ((bg (face-background 'default nil t))
+        (st (or style 'wave)))
+    (custom-set-faces
+     `(,face ((t (:underline (:style ,st :color ,color)
+                             :background ,(my/blend-colors color bg alpha))))))))
+
+(provide 'custom-functions)

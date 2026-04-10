@@ -1,9 +1,10 @@
+;;; -*- lexical-binding: t; -*-
 ;;; JS
 
 (require 'compile)
 (require 'subr-x)
 
-(use-package js2-mode)
+;; (use-package js2-mode)
 
 (add-to-list 'compilation-error-regexp-alist-alist
              '(eslint "^\\(\w+\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3))
@@ -60,19 +61,19 @@
     (with-current-buffer buf
       (npm-run-mode)
       (read-only-mode t))
-      (start-process "npm-run-process" buf "sh" "-c" command)
+    (start-process "npm-run-process" buf "sh" "-c" command)
     ))
 
-  ;; (async-shell-command (concat "cd " (file-at-git-root "") " && npm --color=false start")
-  ;;                      "*npm start*"
-  ;;                      ))
+;; (async-shell-command (concat "cd " (file-at-git-root "") " && npm --color=false start")
+;;                      "*npm start*"
+;;                      ))
 
 
 (defun node-load ()
   (interactive)
   (let* ((file buffer-file-name))
-       (unless buffer-file-name (error "Buffer is not visiting a file"))
-       (nodejs-repl-load-file file)))
+    (unless buffer-file-name (error "Buffer is not visiting a file"))
+    (nodejs-repl-load-file file)))
 
 (defun get-npm-bin-dir ()
   "Get project node bin directory"
@@ -85,20 +86,23 @@
     tern-bin))
 
 (setq js2-mode-hook
-          (lambda ()
-            ;; (smartparens-mode t)
-            (setq compilation-read-command nil)
-            (set (make-local-variable 'compile-command) "npm run build")
-            (define-key js2-mode-map (kbd "C-c C-c") 'compile)
-            (define-key js2-mode-map (kbd "C-C C-n") 'next-error)
-            (define-key js2-mode-map (kbd "C-c C-p") 'previous-error)
-            (define-key js2-mode-map (kbd "C-c C-r") 'npm-start)
-            (define-key js2-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
-            ;; (set (make-local-variable 'tern-command) (list (get-tern-command)))
-            ;; (setq 'tern-command )
-            (flycheck-mode 1)
-            (smartparens-strict-mode 1)
-            ))
+      (lambda ()
+        ;; (smartparens-mode t)
+        (setq compilation-read-command nil)
+        (set (make-local-variable 'compile-command) "npm run build")
+        (define-key js2-mode-map (kbd "C-c C-c") 'compile)
+        (define-key js2-mode-map (kbd "C-C C-n") 'next-error)
+        (define-key js2-mode-map (kbd "C-c C-p") 'previous-error)
+        (define-key js2-mode-map (kbd "C-c C-r") 'npm-start)
+        (define-key js2-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
+        ;; (set (make-local-variable 'tern-command) (list (get-tern-command)))
+        ;; (setq 'tern-command )
+        (smartparens-mode)
+        (electric-indent-mode -1)
+        (setq tab-width 4)
+        (setq indent-tabs-mode nil)
+        ;; (lsp)
+        ))
 
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
@@ -113,10 +117,6 @@
 
 ;;; HTML
 
-;; (use-package company-tern
-;;   :config
-;;   (add-to-list 'company-backends 'company-tern))
-
 (use-package tagedit
   :config
   (tagedit-add-paredit-like-keybindings)
@@ -126,5 +126,5 @@
 (setq sgml-quick-keys 'close)
 
 ;;; Web mode
-(use-package web-mode
-  )
+;; (use-package web-mode
+;;   )

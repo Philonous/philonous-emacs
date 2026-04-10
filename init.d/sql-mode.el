@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (require 'custom-functions)
 (require 'sql)
 (require 'comint)
@@ -24,7 +25,8 @@
   (interactive)
   (if sql-buffer
       (with-current-buffer sql-buffer
-        (comint-clear-interactive-buffer)
+        (comint-clear-buffer)
+        (goto-char (point-max))
         )))
 
 (defun sql-mode-init ()
@@ -35,7 +37,7 @@
 
 (defun custom-sql-interactive-mode-hook ()
     (define-key sql-interactive-mode-map (kbd "C-c C-k")
-      'comint-clear-interactive-buffer )
+      'comint-clear-buffer )
     (define-key sql-interactive-mode-map (kbd "M-`")
       'sql--go-to-old-window )
     (sql-set-product-feature 'postgres :prompt-regexp "^[-[:alnum:]_]*=[#>] ")
@@ -89,3 +91,23 @@
                    :prompt-cont-regexp "^[-[:alnum:]_]*[-(][#>] "
                    :input-filter sql-remove-tabs-filter
                    :terminator '("\\(^\\s-*\\\\g$\\|;\\)" . "\\g")))
+
+(defcustom sql-format-command "sqlformat -ra -k upper -"
+  "Command to run to format SQL strings"
+  :type 'string
+  :group 'sql
+  )
+
+(defun sql-format--region ()
+  (shell-command-on-region (point-min) (point-max) sql-format-command nil t (get-buffer-create "*sqlformat: error*") t)
+  (goto-char (point-min))
+  (flush-lines "^[[:space:]]*$"))
+
+
+(defun sql-format ()
+  (interactive)
+  (if (use-region-p)
+      (save-restriction
+        (narrow-to-region (region-beginning) (region-end))
+        (sql-format--region))
+    (sql-format--region)))

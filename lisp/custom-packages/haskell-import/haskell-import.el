@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (defcustom haskell-import-module-abbrevs
   nil
   "List of module abbreviations"
@@ -77,12 +78,13 @@
                        ("gadts" :language "GADTs")
                        ("lcase" :language "LambdaCase")
                        ("gnt" :language "GeneralizedNewtypeDeriving")
-                       ("i" "Data.String.Interpolate.IsString (i)" :language "QuasiQuotes")
+                       ("ord" :language "OverloadedRecordDot")
+                       ("i" "Data.String.Interpolate" :language "QuasiQuotes")
                        ))
 
 (defun haskell-exists-import-line (line)
   (save-excursion
-    (beginning-of-buffer)
+    (goto-char (point-min))
     (not (not (re-search-forward (concat "^" "import[ ]*" line "$")
                                  (point-max) t)))))
 
@@ -143,8 +145,8 @@
                       (when force-abbrev
                         (error "Module abbreviation \"%s\" not found" import))
                       (list import)))
-           (imports (loop for decl in args while (stringp decl) collect decl))
-           (rest (loop for tail on args while (stringp (car tail))
+           (imports (cl-loop for decl in args while (stringp decl) collect decl))
+           (rest (cl-loop for tail on args while (stringp (car tail))
                        finally (return tail)))
            (extensions-val (plist-get rest :language))
            (extensions (cond
@@ -153,7 +155,7 @@
                         (t (error "extension must be string or sequence")))))
       (mapc (lambda (decl)
               (unless (haskell-exists-import-line decl)
-                (beginning-of-buffer)
+                (goto-char (point-min))
                 (haskell-navigate-imports)
                 (insert (concat "import " decl "\n"))))
             imports)

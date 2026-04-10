@@ -1,4 +1,9 @@
-(use-package nix-mode)
+;;; -*- lexical-binding: t; -*-
+;; (use-package lsp-nix
+;;   :after (lsp-mode)
+;;   :demand t
+;;   :custom
+;;   (lsp-nix-nil-formatter ["nixpkgs-fmt"]))
 
-;;; Possibly useful? But very slow
-;; (use-package company-nixos-options)
+(use-package nix-mode
+  :hook (nix-mode . eglot-ensure) )
