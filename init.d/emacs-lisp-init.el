@@ -4,7 +4,14 @@
   :diminish)
 
 
-(use-package flymake
+(defun my/elisp-flymake-setup ()
+  "Set up flymake for Emacs Lisp: byte-compile with our load-path, no checkdoc."
+  (remove-hook 'flymake-diagnostic-functions #'elisp-flymake-checkdoc t)
+  (setq-local elisp-flymake-byte-compile-load-path load-path)
+  (flymake-mode 1))
+
+(use-package elisp-mode
+  :ensure nil
   :custom (trusted-content
            ( list
              ;; trusted-content-p compares paths after calling
@@ -13,10 +20,4 @@
              (abbreviate-file-name (expand-file-name "lisp/" user-emacs-directory))
              (abbreviate-file-name (expand-file-name "init.d/" user-emacs-directory)))
            )
-  :hook ((emacs-lisp-mode . flymake-mode)
-         (emacs-lisp-mode . (lambda ()
-                              (remove-hook 'flymake-diagnostic-functions
-                                           #'elisp-flymake-checkdoc t)))
-         (emacs-lisp-mode . (lambda ()
-                              (setq-local elisp-flymake-byte-compile-load-path load-path)))
-         ))
+  :hook (emacs-lisp-mode . my/elisp-flymake-setup))

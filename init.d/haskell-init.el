@@ -63,6 +63,11 @@
   (haskell-process-load-file)
   )
 
+(defun haskell-init--eglot-dwim ()
+  (interactive)
+  (if (locate-dominating-file default-directory "hie.yaml")
+      (eglot-ensure)))
+
 (use-package haskell-mode
   :defer t
   :preface
@@ -116,6 +121,7 @@
   ((haskell-mode . subword-mode)
    (haskell-mode . haskell-indentation-mode)
    (haskell-mode . my/eldoc-use-buffer)
+   (haskell-mode . haskell-init--eglot-dwim)
    ))
 
 (use-package haskell-interactive-mode
@@ -126,7 +132,11 @@
               ("M-`" . haskell-go-to-old-window)
               ("C-`" . haskell-go-to-old-window)))
 
+;;; Haskell-specific parts of shared packages (general config: progmode.el)
+
 (use-package project
+  :ensure nil
+  :defer t
   :config
   (add-to-list 'project-vc-extra-root-markers "hie.yaml")
   (add-to-list 'project-vc-extra-root-markers "*.cabal")
@@ -144,6 +154,7 @@ Each element of COMMANDS is a list (PROGRAM . ARGS)."
 
 
 (use-package apheleia
+  :ensure nil
   :defer t
   :config
   (setf (alist-get 'haskell-mode apheleia-mode-alist)
@@ -154,14 +165,9 @@ Each element of COMMANDS is a list (PROGRAM . ARGS)."
            (list "fourmolu" "--stdin" buffer-file-name))))
   )
 
-(defun haskell-init--eglot-dwim ()
-  (interactive)
-  (if (locate-dominating-file default-directory "hie.yaml")
-      (eglot-ensure)))
-
 (use-package eglot
-  :hook
-  ((haskell-mode . haskell-init--eglot-dwim))
+  :ensure nil
+  :defer t
   :config
   ;; HLS settings (sent to the server under the "haskell" section).
   ;; - sessionLoading "multipleComponents": load all Cabal components
@@ -175,17 +181,6 @@ Each element of COMMANDS is a list (PROGRAM . ARGS)."
                            :haskell
                            '(:sessionLoading "multipleComponents"
                                              :plugin (:semanticTokens (:globalOn nil)))))
-  ;; LSP hover uses markdown-mode for fontification which is slow when the hower is large
-  ;; Emacs can hang for seconds while it is rendering
-  ;; This is a hack that skips formatting the markup when it is large
-  ;; TODO: Report the hang as bug or check if it is already fixed.
-  ;; This might break in the future
-  (defun my/eglot-skip-huge-markup (orig markup)
-    (let ((str (if (stringp markup) markup (plist-get markup :value))))
-      (if (and str (> (length str) 20000))
-          str
-        (funcall orig markup))))
-  (advice-add 'eglot--format-markup :around #'my/eglot-skip-huge-markup)
   )
 
 ;;; Regenerate .cabal from package.yaml on save -------------------------------

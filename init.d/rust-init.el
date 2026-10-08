@@ -7,6 +7,7 @@
   :defer t
   :custom
   (rust-mode-treesitter-derive t)
+  :hook (rust-mode . eglot-ensure)
   :bind
   (:map rust-mode-map
         ("<f11>" . 3-column-prog-layout))
@@ -80,7 +81,3 @@
 
 (use-package realgud :defer t)
 (use-package realgud-lldb :defer t)
-
-(use-package eglot
-  :hook
-  ((rust-mode . eglot-ensure)))

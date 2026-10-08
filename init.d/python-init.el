@@ -31,6 +31,8 @@
 
 
 (use-package apheleia
+  ;; Python-specific part; general config in progmode.el
+  :ensure nil
   :defer t
   :config
   (setf (alist-get 'python-mode apheleia-mode-alist)

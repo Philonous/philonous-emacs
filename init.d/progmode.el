@@ -1,5 +1,11 @@
 ;;; -*- lexical-binding: t; -*-
-(use-package apheleia)
+;; General configuration for shared development packages lives here.
+;; Language-specific parts (hooks, formatters, server settings) stay in
+;; the language's init file, in a secondary `:ensure nil' block.
+
+(use-package apheleia
+  :hook (after-init . apheleia-global-mode)
+  :diminish)
 
 (use-package eglot
   :bind
@@ -7,6 +13,18 @@
         ("C-c C-a C-a" . eglot-code-actions)
         ("C-c C-q" . eglot-format-buffer)
         )
+  :config
+  ;; LSP hover uses markdown-mode for fontification which is slow when the hower is large
+  ;; Emacs can hang for seconds while it is rendering
+  ;; This is a hack that skips formatting the markup when it is large
+  ;; TODO: Report the hang as bug or check if it is already fixed.
+  ;; This might break in the future
+  (defun my/eglot-skip-huge-markup (orig markup)
+    (let ((str (if (stringp markup) markup (plist-get markup :value))))
+      (if (and str (> (length str) 20000))
+          str
+        (funcall orig markup))))
+  (advice-add 'eglot--format-markup :around #'my/eglot-skip-huge-markup)
   )
 
 (use-package flymake

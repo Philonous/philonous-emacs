@@ -292,10 +292,6 @@
         auto-insert-alist nil)
   (auto-insert-mode 1))
 
-(use-package apheleia
-  :hook (after-init . apheleia-global-mode)
-  :diminish)
-
 ;;; ---- Log watch mode (standalone, no package) -------------------------------
 
 (require 'ansi-color)  ; cheap built-in, needed by log-watch
