@@ -1,3 +1,11 @@
 /elpa/
 *.elc
-*.elc
+
+# Runtime state written by Emacs and packages
+/auto-save-list/
+/.cache/
+/eln-cache/
+/transient/
+/bookmarks
+/projects
+/projectile-bookmarks.eld

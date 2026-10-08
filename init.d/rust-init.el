@@ -1,11 +1,5 @@
 ;;; -*- lexical-binding: t; -*-
 
-(defcustom rust-indent-offset 4
-  "Indent Rust code by this number of spaces."
-  :type 'integer
-  :group 'rust-mode
-  :safe #'integerp)
-
 (use-package s :defer t)
 (use-package dash :defer t)
 
@@ -39,10 +33,9 @@
   (defun rust-open-dependency-docs ()
     "Query for a direct dependency and open its documentation."
     (interactive)
-    (let* ((json-object-type 'alist)
-           (json-array-type 'list)
-           (metadata (json-read-from-string
-                      (shell-command-to-string "cargo metadata --format-version 1 --no-deps")))
+    (let* ((metadata (json-parse-string
+                      (shell-command-to-string "cargo metadata --format-version 1 --no-deps")
+                      :object-type 'alist :array-type 'list))
            (packages (alist-get 'packages metadata))
            (current-pkg (or (cl-find-if
                              (lambda (pkg)
@@ -56,7 +49,8 @@
            (target-dir (alist-get 'target_directory metadata))
            (doc-dir (concat target-dir "/doc")))
       (message "Building docs for %s..." dep-name)
-      (shell-command (format "cargo doc --no-deps --package %s" dep-name))
+      (shell-command (format "cargo doc --no-deps --package %s"
+                             (shell-quote-argument dep-name)))
       (let ((doc-path (or (rust--find-doc-dir doc-dir dep-name)
                           (rust--find-doc-dir doc-dir (replace-regexp-in-string "-" "_" dep-name))
                           (rust--find-doc-dir doc-dir (replace-regexp-in-string "_" "-" dep-name)))))

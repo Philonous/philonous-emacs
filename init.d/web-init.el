@@ -4,10 +4,8 @@
 (require 'compile)
 (require 'subr-x)
 
-;; (use-package js2-mode)
-
 (add-to-list 'compilation-error-regexp-alist-alist
-             '(eslint "^\\(\w+\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3))
+             '(eslint "^\\([^:\n]+\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3))
 (add-to-list 'compilation-error-regexp-alist 'eslint)
 
 (add-to-list 'compilation-error-regexp-alist-alist
@@ -69,52 +67,6 @@
 ;;                      ))
 
 
-(defun node-load ()
-  (interactive)
-  (let* ((file buffer-file-name))
-    (unless buffer-file-name (error "Buffer is not visiting a file"))
-    (nodejs-repl-load-file file)))
-
-(defun get-npm-bin-dir ()
-  "Get project node bin directory"
-  (string-trim (shell-command-to-string "npm bin"))
-  )
-
-(defun get-tern-command ()
-  (let* ((node-bin (get-npm-bin-dir))
-         (tern-bin (concat (file-name-as-directory node-bin) "tern")))
-    tern-bin))
-
-(setq js2-mode-hook
-      (lambda ()
-        ;; (smartparens-mode t)
-        (setq compilation-read-command nil)
-        (set (make-local-variable 'compile-command) "npm run build")
-        (define-key js2-mode-map (kbd "C-c C-c") 'compile)
-        (define-key js2-mode-map (kbd "C-C C-n") 'next-error)
-        (define-key js2-mode-map (kbd "C-c C-p") 'previous-error)
-        (define-key js2-mode-map (kbd "C-c C-r") 'npm-start)
-        (define-key js2-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
-        ;; (set (make-local-variable 'tern-command) (list (get-tern-command)))
-        ;; (setq 'tern-command )
-        (smartparens-mode)
-        (electric-indent-mode -1)
-        (setq tab-width 4)
-        (setq indent-tabs-mode nil)
-        ;; (lsp)
-        ))
-
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-(add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
-(add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
-
-(defun rjsx-mode-init ()
-  (define-key rjsx-mode-map "<" #'self-insert-command)
-  )
-
-(add-hook 'rjsx-mode-hook #'rjsx-mode-init)
-
-
 ;;; HTML
 
 (use-package tagedit
@@ -124,7 +76,3 @@
   :hook (html-mode . tagedit-mode))
 
 (setq sgml-quick-keys 'close)
-
-;;; Web mode
-;; (use-package web-mode
-;;   )

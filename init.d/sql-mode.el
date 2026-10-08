@@ -29,24 +29,22 @@
         (goto-char (point-max))
         )))
 
+(define-key sql-mode-map (kbd "M-`") 'sql--go-to-sql-buffer)
+(define-key sql-mode-map (kbd "C-c C-k") 'sql--clear-interactive-buffer)
+(define-key sql-interactive-mode-map (kbd "C-c C-k") 'comint-clear-buffer)
+(define-key sql-interactive-mode-map (kbd "M-`") 'sql--go-to-old-window)
+
+;; Allow hyphens in database names in the psql prompt
+(sql-set-product-feature 'postgres :prompt-regexp "^[-[:alnum:]_]*=[#>] ")
+(sql-set-product-feature 'postgres :prompt-cont-regexp "^[-[:alnum:]_]*[-(][#>] ")
+
 (defun sql-mode-init ()
-  (require 'persistent-sql-log)
-  (define-key sql-mode-map (kbd "M-`") 'sql--go-to-sql-buffer)
-  (define-key sql-mode-map (kbd "C-c C-k") 'sql--clear-interactive-buffer)
-  )
+  (require 'persistent-sql-log))
 
-
-(defun custom-sql-interactive-mode-hook ()
-  (define-key sql-interactive-mode-map (kbd "C-c C-k")
-              'comint-clear-buffer )
-  (define-key sql-interactive-mode-map (kbd "M-`")
-              'sql--go-to-old-window )
-  (sql-set-product-feature 'postgres :prompt-regexp "^[-[:alnum:]_]*=[#>] ")
-  (sql-set-product-feature 'postgres :prompt-cont-regexp "^[-[:alnum:]_]*[-(][#>] "))
-
-
-(add-hook 'sql-mode-hook 'custom-sql-interactive-mode-hook)
 (add-hook 'sql-mode-hook 'sql-mode-init)
+
+(defvar sql-container ""
+  "Docker container to run psql in for the `postgres-docker' product.")
 
 (defun sql-comint-postgres-docker (product options &optional buf-name)
   "Create comint buffer and connect to Postgres."

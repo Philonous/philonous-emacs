@@ -20,7 +20,7 @@
                           (derived-mode-p 'dired-mode)))
                       (window-list)))
          (rest (cdr (memq (selected-window) dired-wins))))
-    (when-let ((next (or (car rest) (car dired-wins))))
+    (when-let* ((next (or (car rest) (car dired-wins))))
       (unless (eq next (selected-window))
         (select-window next)))))
 

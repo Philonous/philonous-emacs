@@ -1,6 +1,5 @@
 ;;; -*- lexical-binding: t; -*-
 (use-package org
-  :hook (org-mode . my/org-mode-init)
   :custom
   (org-todo-keywords
    '((sequence "TODO" "|" "DONE")))
@@ -18,8 +17,10 @@
    ("S-<down>"  . nil)
    ("S-<left>"  . nil)
    ("S-<right>" . nil)
+   ("C-<tab>"   . nil)
+   ("M-e"       . nil)
    ;; TODO state cycling
-   ("M-<right>"    . org-todo)
+   ("M-<right>" . org-todo)
    ("M-<left>"  . my/org-todo-previous)
    )
   :init
@@ -29,9 +30,6 @@
     (require 'org)
     (find-file org-default-notes-file))
   :config
-  (defun my/org-mode-init ()
-    (define-key org-mode-map (kbd "C-<tab>") nil)
-    (define-key org-mode-map (kbd "M-e") nil))
   (org-babel-do-load-languages 'org-babel-load-languages
                                '((emacs-lisp . t)
                                  (shell . t)

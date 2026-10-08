@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (defun my/auth-source--write (host user port password)
   "Helper: write a new entry and call its :save-function."
   (let* ((auth-source-save-behavior t)  ; we've already confirmed; skip y/n

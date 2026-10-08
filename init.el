@@ -1,6 +1,13 @@
 ;; init.el -*- lexical-binding: t -*-
 
-(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+;; Set early so that anything writing customizations during startup
+;; (e.g. package.el saving `package-selected-packages') doesn't write
+;; them into init.el.
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+
+(eval-when-compile (require 'use-package))
+
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
                          ("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")
                          ("nongnu" . "https://elpa.nongnu.org/nongnu/")
@@ -37,8 +44,6 @@
 (add-to-list 'load-path (expand-file-name "init.d" user-emacs-directory))
 (require 'custom-functions)
 
-(eval-when-compile (require 'use-package))
-
 
 (let ((init-files (directory-files (expand-file-name "init.d" user-emacs-directory) t "\\.el\\'")))
   (mapc (lambda (f)
@@ -50,7 +55,6 @@
         init-files))
 
 
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 (put 'dired-find-alternate-file 'disabled nil)
 (put 'narrow-to-region 'disabled nil)

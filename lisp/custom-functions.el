@@ -51,8 +51,8 @@
 
 (defun what-face (pos)
   (interactive "d")
-  (let ((face (or (get-char-property (point) 'read-face-name)
-                  (get-char-property (point) 'face))))
+  (let ((face (or (get-char-property pos 'read-face-name)
+                  (get-char-property pos 'face))))
     (if face (message "Face: %s" face) (message "No face at %d" pos))))
 
 (require 'rect)
@@ -116,11 +116,8 @@ C-u 0 M-x enumerate-rectangle"
 
 (defun get-haskell-buffer ()
   (save-window-excursion
-    (if (bound-and-true-p intero-mode)
-        (intero-repl-buffer nil t)
-      (let ((sess (haskell-session)))
-        (if sess (haskell-session-interactive-buffer sess)
-          nil)))))
+    (let ((sess (haskell-session)))
+      (when sess (haskell-session-interactive-buffer sess)))))
 
 (defun layout-for-haskell ()
   (interactive)
@@ -130,7 +127,7 @@ C-u 0 M-x enumerate-rectangle"
         (mapc 'delete-window (get-buffer-window-list haskell-buffer))
         (let ((buffer-next-window (window-buffer (next-window))))
           (progn
-            (let ((ignore-window-parameters t)) delete-other-windows)
+            (let ((ignore-window-parameters t)) (delete-other-windows))
             (let* ((right-window (split-window-right -80))
                    (haskell-window (split-window-below -20))
                    (_middle-window (split-window-right 80)))
@@ -233,23 +230,6 @@ C-u 0 M-x enumerate-rectangle"
           (set-window-parameter compile-window 'compile-window t))
         (set-window-buffer right-window buffer-next-window )))))
 
-;; (defun layout-for-haskell ()
-;;   (interactive)
-;;   (save-selected-window
-;;   (let ((haskell-buffer (get-haskell-buffer)))
-;;   (progn
-;;   (mapc 'delete-window (get-buffer-window-list haskell-buffer))
-;;   (let ((buffer-next-window (window-buffer (next-window))))
-;;   (progn
-;;     (delete-other-windows)
-;;     (let ((haskell-window (split-window-below -13))
-;;           (right-window   (split-window-right)))
-;;       (progn
-;;         (set-window-buffer haskell-window haskell-buffer )
-;;         (set-window-dedicated-p haskell-window t )
-;;         (set-window-parameter haskell-window 'no-other-window t)
-;;         (set-window-buffer right-window buffer-next-window )))))))))
-
 (defvar haskell-process-old-window nil)
 
 (defun haskell-process-save-current-window ()
@@ -269,9 +249,8 @@ C-u 0 M-x enumerate-rectangle"
 
 (defun haskell-repl-clear-buffer ()
   (interactive)
-  (cond
-   ((string= major-mode "intero-repl-mode") (intero-repl-clear-buffer))
-   ((string= major-mode "haskell-interactive-mode") (haskell-interactive-mode-clear))))
+  (when (derived-mode-p 'haskell-interactive-mode)
+    (haskell-interactive-mode-clear)))
 
 (defun haskell-clear-interactive-window ()
   (interactive)
@@ -286,7 +265,7 @@ C-u 0 M-x enumerate-rectangle"
                        (let ((inhibit-read-only t))
                          (erase-buffer))))))
 
-(defun flysspell-region-or-buffer ()
+(defun flyspell-region-or-buffer ()
   "run flyspell-region when region is active and flyspell-buffer otherwise"
   (interactive)
   (if (region-active-p)
@@ -320,7 +299,7 @@ C-u 0 M-x enumerate-rectangle"
   (apply-on-rectangle 'upcase-rectangle-line b e))
 
 (defun downcase-rectangle (b e)
-  "change chars in rectangle to uppercase"
+  "change chars in rectangle to lowercase"
   (interactive "r")
   (apply-on-rectangle 'downcase-rectangle-line b e))
 
@@ -348,7 +327,7 @@ C-u 0 M-x enumerate-rectangle"
 
 (defun abbreviate-module (module-name)
   (let ((parts (split-string module-name "[.]")))
-    (mapconcat (lambda (str) (substring str 0 1)) parts ""))):
+    (mapconcat (lambda (str) (substring str 0 1)) parts "")))
 
 (defun underscore-to-camelcase (rbeg rend)
   "Convert underscores to camelCase"
@@ -364,10 +343,10 @@ C-u 0 M-x enumerate-rectangle"
           (replace-match (concat (downcase (match-string 1)) "_") t)
           (goto-char beg)
           (while (re-search-forward "_\\([[:alnum:]]+\\)" end t)
-            (replace-match (s-capitalize (match-string 1)) t))))))
+            (replace-match (capitalize (match-string 1)) t))))))
 
 (defun camelcase-to-underscore (rbeg rend)
-  "Convert underscores to camelCase"
+  "Convert camelCase to underscores"
   (interactive "r")
   (let* ((case-fold-search nil)
          (bounds (if (use-region-p) (cons rbeg rend) (bounds-of-thing-at-point 'symbol)))
@@ -418,7 +397,7 @@ and the other way around otherwise"
     (concat (downcase (substring str 0 1)) (substring str 1))))
 
 (defun cap (str)
-  "Transform the first letter of STR to lower case"
+  "Transform the first letter of STR to upper case"
   (if (< (length str) 1)
       ""
     (concat (upcase (substring str 0 1)) (substring str 1))))
@@ -511,13 +490,13 @@ Repeated invocations toggle between the two most recently open buffers."
   (interactive "MProgram: ")
   (call-process program nil nil nil buffer-file-name))
 
-(provide 'custom-functions)
-
 (defun open-project-todo ()
   (interactive)
   (let ((dir (or (locate-dominating-file default-directory "TODO.org")
-                 (projectile-project-root))))
-    (find-file-other-window (concat dir "/" "TODO.org"))))
+                 (when-let* ((proj (project-current)))
+                   (project-root proj))
+                 default-directory)))
+    (find-file-other-window (expand-file-name "TODO.org" dir))))
 
 (defcustom curl-to-python-command "curlconverter --language python -"
   "Command to convert curl to python"

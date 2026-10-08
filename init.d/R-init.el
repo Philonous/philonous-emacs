@@ -27,9 +27,8 @@
 
 (defun r-mode-init ()
   (interactive)
-  (require 'smartparens)
-  (smartparens-mode t)
-  (column-number-mode t)
+  (when (require 'smartparens nil t)
+    (smartparens-mode t))
   (setq inferior-ess-program "R")
   (setq inferior-R-program "R")
   (setq ess-local-process-name "R")

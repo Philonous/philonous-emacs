@@ -61,15 +61,15 @@
 
 ;;; ---- General settings (cheap, no requires) ---------------------------------
 
-(setq compilation-scroll-output t
-      inhibit-splash-screen t
+(setq inhibit-splash-screen t
       ring-bell-function 'ignore
-      fill-column 80
       require-final-newline 'visit-save
       completion-cycle-threshold 10
       backup-by-copying t)
 
-(setq-default indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil
+              fill-column 80)
+(column-number-mode 1)
 (setopt create-lockfiles nil)
 
 (transient-mark-mode -1)
@@ -132,17 +132,15 @@
 (global-set-key (kbd "<Scroll_Lock>") #'ibuffer)
 (global-set-key (kbd "M-p") #'backward-paragraph)
 (global-set-key (kbd "M-n") #'forward-paragraph)
-(global-set-key (kbd "C-x C-p") #'gist-region-or-buffer)
 (global-set-key (kbd "C-x r #") #'enumerate-rectangle)
 (global-set-key (kbd "<C-kp-add>") #'increment-number-at-point)
 (global-set-key (kbd "<C-kp-subtract>") #'decrement-number-at-point)
 (global-set-key (kbd "<C-S-SPC>") #'set-rectangular-region-anchor)
 (global-set-key (kbd "M-z") #'zap-up-to-char)
 (global-set-key (kbd "C-z") #'jump-to-char)
-(global-set-key (kbd "C-c s") #'flyspell-region-or-buffer) ; was flysspell (typo)
+(global-set-key (kbd "C-c s") #'flyspell-region-or-buffer)
 (global-set-key (kbd "C-x C-b") #'switch-to-previous-buffer)
 (global-set-key (kbd "C-x C-m") #'make-frame)
-(global-set-key (kbd "C-c C-p") #'close-open-paren)
 (global-set-key (kbd "<f11>") #'split-windows-threeway)
 (global-set-key (kbd "C-c p") #'check-parens)
 (global-set-key (kbd "C-c d") #'duplicate-line-or-region)
@@ -261,8 +259,7 @@
   :config
   (setq auto-insert-query nil
         auto-insert-alist nil)
-  (auto-insert-mode 1)
-  (add-hook 'find-file-hook #'auto-insert))
+  (auto-insert-mode 1))
 
 (use-package apheleia
   :hook (after-init . apheleia-global-mode)
@@ -291,8 +288,6 @@
     (remove-hook 'after-change-functions #'log-watch-apply-ansi-colors t)
     (auto-revert-mode -1)))
 
-;;; global-init.el ends here
-
 (defun my/breadcrumb ()
   (let* ((f (or buffer-file-name default-directory))
          (host (file-remote-p f 'host))
@@ -310,3 +305,5 @@
 (use-package sops)
 
 (use-package isend-mode)
+
+;;; global-init.el ends here

@@ -108,13 +108,9 @@
 
   :config
   (haskell-set-align-rules)
-  (add-to-list 'display-buffer-alist
-               '("\\*.*compilation\\*"
-                 (my/display-in-compile-target-window)))
 
   :hook
   ((haskell-mode . subword-mode)
-   (haskell-mode . column-number-mode)
    (haskell-mode . haskell-indentation-mode)
    (haskell-mode . my/eldoc-use-buffer)
    ))
@@ -171,13 +167,11 @@ Each element of COMMANDS is a list (PROGRAM . ARGS)."
   ;;   files silently get no diagnostics.
   ;; - semanticTokens globalOn: enable HLS's semantic highlighting (it's
   ;;   off by default, and Eglot requests it anyway, causing log noise).
-  (with-eval-after-load 'eglot
-    (setq-default eglot-workspace-configuration
-                  (plist-put (copy-tree (default-value 'eglot-workspace-configuration))
-                             :haskell
-                             '(:sessionLoading "multipleComponents"
-                                               :plugin (:semanticTokens (:globalOn nil))
-                                               ))))
+  (setq-default eglot-workspace-configuration
+                (plist-put (copy-tree (default-value 'eglot-workspace-configuration))
+                           :haskell
+                           '(:sessionLoading "multipleComponents"
+                                             :plugin (:semanticTokens (:globalOn nil)))))
   ;; LSP hover uses markdown-mode for fontification which is slow when the hower is large
   ;; Emacs can hang for seconds while it is rendering
   ;; This is a hack that skips formatting the markup when it is large
