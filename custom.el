@@ -112,21 +112,49 @@
  '(lsp-rust-features [])
  '(lsp-ui-doc-position 'bottom)
  '(magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18))
+ '(markdown-command "pandoc")
  '(mode-line-percent-position nil)
  '(org-todo-keywords '((sequence "TODO" "WORKING" "|" "DONE")))
  '(package-selected-packages
-   '(apheleia auto-compile cargo corfu cquery dap-mode deadgrep diff-hl
-              diminish docker-compose-mode dockerfile-mode
-              embark-consult envrc ess esup expand-region flymake
-              git-gutter-fringe haskell-mode magit marginalia
-              multiple-cursors nix-mode orderless paredit
-              poe-lootfilter-mode realgud-lldb rust-mode tagedit
-              vagrant-tramp vertico vterm writegood-mode yasnippet
-              zenburn-theme))
+   '(apheleia auto-compile cargo claude-code corfu cquery dap-mode
+              deadgrep diff-hl diminish diredfl docker-compose-mode
+              dockerfile-mode eat ellama embark-consult envrc ess esup
+              expand-region flymake git-gutter-fringe gptel
+              haskell-mode isend-mode magit majutsu marginalia minuet
+              multiple-cursors nix-mode ollama-buddy orderless paredit
+              poe-lootfilter-mode realgud-lldb rust-mode sops tagedit
+              treemacs vagrant-tramp vertico vterm writegood-mode yaml
+              yasnippet zenburn-theme))
+ '(package-vc-selected-packages '((majutsu :url "https://github.com/0WD0/majutsu")))
  '(rust-rustfmt-bin "rustfmt")
  '(rustic-rustfmt-args "--edition=2021")
  '(safe-local-variable-values
-   '((sql-connection-alist
+   '((lsp-haskell-formatting-provider . "ormolu")
+     (haskell-process-type 'cabal-repl)
+     (haskell-process-type :cabal-repl)
+     (haskell-process-type "cabal-repl")
+     (sql-connection-alist
+      ("ukaa" (sql-product 'postgres) (sql-user "postgres")
+       (sql-server "localhost") (sql-database "postgres")
+       (sql-port 5432)
+       (sql-default-directory "/docker:ukaa-database-test-1:"))
+      ("ukaa-testing" (sql-product 'postgres) (sql-user "postgres")
+       (sql-server "localhost") (sql-database "postgres")
+       (sql-port 5432)
+       (sql-default-directory "/docker:ukaa-testing-database:")))
+     (sql-connection-alist
+      ("ukaa" (sql-product 'postgres) (sql-user "postgres")
+       (sql-server "localhost") (sql-database "postgres")
+       (sql-port 5432)
+       (sql-default-directory "/docker:ukaa-database-test-1:"))
+      ("ukaa-testing" (sql-product 'postgres) (sql-user "postgres")
+       (sql-server "localhost") (sql-database "postgres")
+       (sql-port 5432)
+       (sql-default-directory "/docker:ukaa-test-database:")))
+     (haskell-init--ide-mode . hls)
+     (intero-targets "test-server:lib" "test-server:test:integration"
+                     "test-server:test:tests")
+     (sql-connection-alist
       ("ukaa" (sql-product 'postgres) (sql-user "postgres")
        (sql-server "localhost") (sql-database "postgres")
        (sql-port 5432)

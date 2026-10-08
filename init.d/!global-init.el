@@ -2,6 +2,9 @@
 
 ;;; ---- Theme & Visuals (necessarily eager) -----------------------------------
 
+
+(setq custom-unlispify-tag-names nil)
+
 (use-package zenburn-theme
   :config
   (load-theme 'zenburn t))
@@ -23,12 +26,24 @@
 
 ;;; ---- Mode line -------------------------------------------------------------
 
-;; NOTE: If you re-enable lsp-mode, uncomment the defvar below.
-;; Without it, my-modeline--lsp-workspaces is void and your mode-line
-;; will throw warnings on every redraw.
-;; (defvar my-modeline--lsp-workspaces nil
-;;   "Placeholder — set properly if lsp-mode is active.")
-;; (put 'my-modeline--lsp-workspaces 'risky-local-variable t)
+(defvar-local my/narrow-mode-line-indicator
+  '(:eval (when (buffer-narrowed-p)
+            (propertize " [NARROWED] " 'face 'warning))))
+(put 'my/narrow-mode-line-indicator 'risky-local-variable t)
+
+(defvar-local my/line-ending-indicator
+  '(:eval (pcase (and buffer-file-coding-system
+                      (coding-system-eol-type buffer-file-coding-system))
+            (1 (propertize " [WINDOWS] "
+                           'face '(:background "red" :foreground "white" :weight bold)
+                           'help-echo "CRLF line endings — convert with C-x RET f unix"))
+            (2 (propertize " [MAC] "
+                           'face '(:background "orange" :foreground "black" :weight bold)
+                           'help-echo "CR line endings"))
+            (_ "")
+            )))
+
+(put 'my/line-ending-indicator 'risky-local-variable t)
 
 (setq-default mode-line-format
               '("%e" mode-line-front-space
@@ -37,7 +52,9 @@
                  display
                  (min-width
                   (3.0)))
-                " " mode-line-remote " " mode-line-buffer-identification
+                my/line-ending-indicator
+                my/narrow-mode-line-indicator
+                mode-line-remote " " mode-line-buffer-identification
                 " »" (:eval (symbol-name major-mode)) "« "
                 "   "
                 mode-line-misc-info mode-line-end-spaces))
@@ -65,11 +82,6 @@
 
 (add-hook 'before-save-hook 'whitespace-cleanup)
 
-;;; ---- Backup & autosave (defer tramp!) --------------------------------------
-;;
-;; The old `(require 'tramp)` was probably your biggest startup cost.
-;; We set up local backup dirs eagerly (cheap), and only wire in the
-;; tramp exclusion once tramp actually loads.
 
 (defvar user-temporary-file-directory
   (concat temporary-file-directory user-login-name "/emacs/"))
@@ -82,11 +94,32 @@
 (setq auto-save-file-name-transforms
       `((".*" ,user-temporary-file-directory t)))
 
-;; Once tramp loads, prepend its exclusion so remote files don't get
-;; backed up locally. This replaces the eager (require 'tramp).
-(with-eval-after-load 'tramp
+(use-package tramp
+  :ensure nil  ; built-in
+  :defer t
+  :config
+  (require 'auth-source)
+  (require 'secrets)
   (add-to-list 'backup-directory-alist
-               `(,tramp-file-name-regexp . nil)))
+               `(,tramp-file-name-regexp . nil))
+
+  :custom
+  ;; Compare https://coredumped.dev/2025/06/18/making-tramp-go-brrrr./
+  (tramp-copy-size-limit (* 2 1024 1024))
+  (tramp-use-scp-direct-remote-copying t)
+  (remote-file-name-inhibit-locks t)
+  )
+
+(use-package auth-source
+  :ensure nil
+  :defer t
+  :custom
+  (auth-sources '("secrets:tramp"))
+  (auth-source-do-cache nil)
+  (auth-source-cache-expiry 60)
+  (auth-source-save-behavior t)
+  )
+
 
 ;;; ---- Key bindings (no packages needed) -------------------------------------
 
@@ -178,7 +211,14 @@
   :bind ("M-e" . er/expand-region))
 
 (use-package magit
-  :bind ("C-x g" . magit-status))
+  :bind ("C-x g" . magit-status)
+  :custom
+  (magit-diff-refine-hunk (quote all)))
+
+(use-package majutsu
+  :vc (:url "https://github.com/0WD0/majutsu")
+  :bind ("C-x j" . majutsu)
+  )
 
 (use-package diff-hl
   :hook (magit-post-refresh . diff-hl-magit-post-refresh) ; was -hook (double-hooked)
@@ -252,3 +292,21 @@
     (auto-revert-mode -1)))
 
 ;;; global-init.el ends here
+
+(defun my/breadcrumb ()
+  (let* ((f (or buffer-file-name default-directory))
+         (host (file-remote-p f 'host))
+         (path (or (file-remote-p f 'localname) f)))
+    (concat (when host
+              (propertize (concat " @ " host ":") 'face 'warning))
+            (if host path (abbreviate-file-name path)))))
+
+(setq-default header-line-format '(:eval (my/breadcrumb)))
+
+(use-package eat
+  :pin "nongnu"
+  )
+
+(use-package sops)
+
+(use-package isend-mode)

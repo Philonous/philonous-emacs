@@ -13,6 +13,9 @@
   :defer t
   :custom
   (rust-mode-treesitter-derive t)
+  :bind
+  (:map rust-mode-map
+        ("<f11>" . 3-column-prog-layout))
   :config
   (defun rust-add-sysroot ()
     "Add the nightly Rust sysroot lib to LD_LIBRARY_PATH."
@@ -83,3 +86,7 @@
 
 (use-package realgud :defer t)
 (use-package realgud-lldb :defer t)
+
+(use-package eglot
+  :hook
+  ((rust-mode . eglot-ensure)))

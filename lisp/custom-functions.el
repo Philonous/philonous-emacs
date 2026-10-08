@@ -77,9 +77,9 @@ C-u 0 M-x enumerate-rectangle"
       (goto-char end)
       (setq lineN (line-number-at-pos)))
     (setq fmt (cl-concatenate 'string
-                           "%"
-                           (format "%0d" (string-width (format "%0d" (+ enumerate-line-num (- lineN line0)))))
-                           ".1d"))
+                              "%"
+                              (format "%0d" (string-width (format "%0d" (+ enumerate-line-num (- lineN line0)))))
+                              ".1d"))
     (apply-on-rectangle 'enumerate-line start end fmt)))
 
 
@@ -181,7 +181,7 @@ C-u 0 M-x enumerate-rectangle"
                 (set-window-buffer haskell-window haskell-buffer )
                 (set-window-dedicated-p haskell-window t)
                 (with-selected-window compile-window
-                  (switch-to-buffer "*compile*")
+                  (switch-to-buffer "*compilation*")
                   (set-window-dedicated-p compile-window 'soft)
                   (set-window-parameter compile-window 'compile-window t))
                 (set-window-parameter haskell-window 'no-other-window t)
@@ -216,6 +216,22 @@ C-u 0 M-x enumerate-rectangle"
      ((string= hostname "blackbird") (layout-for-haskell-blackbird))
      ((string= hostname "tukan") (layout-for-haskell2))
      (t (layout-for-haskell2)))))
+
+(defun 3-column-prog-layout ()
+  "3 column layout for development"
+  (interactive)
+  (save-selected-window
+    (let ((buffer-next-window (window-buffer (next-window))))
+      (delete-other-windows)
+      (let* ((right-window (split-window-right (- (/ (window-total-width) 3))))
+             (_middle-window (split-window-right))
+             (compile-window (with-selected-window right-window
+                               (split-window-below (- (/ (* (window-total-height) 2) 5))))))
+        (with-selected-window compile-window
+          (switch-to-buffer "*compilation*")
+          (set-window-dedicated-p compile-window 'soft)
+          (set-window-parameter compile-window 'compile-window t))
+        (set-window-buffer right-window buffer-next-window )))))
 
 ;; (defun layout-for-haskell ()
 ;;   (interactive)
@@ -503,7 +519,7 @@ Repeated invocations toggle between the two most recently open buffers."
                  (projectile-project-root))))
     (find-file-other-window (concat dir "/" "TODO.org"))))
 
-(defcustom curl-to-python-command "~/.local/bin/curlconverter --language python -"
+(defcustom curl-to-python-command "curlconverter --language python -"
   "Command to convert curl to python"
   :type 'string
   :group 'python

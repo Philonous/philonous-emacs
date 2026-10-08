@@ -1,4 +1,5 @@
 ;;; -*- lexical-binding: t; -*-
+
 (defun my/dired-two-pane ()
   "Orthodox file manager mode: two dired buffers, side by side."
   (interactive)
@@ -31,6 +32,11 @@
         ("<tab>" . my/dired-next-pane)
         ("<f11>" . my/dired-two-pane)
         )
+  :custom-face
+  (dired-executable ((t (:inherit warning ))))
   :config
   (setopt dired-dwim-target t)
-  )
+  (font-lock-add-keywords
+   'dired-mode
+   `((,dired-re-exe
+      (".+" (dired-move-to-filename) nil (0 'dired-executable))))))

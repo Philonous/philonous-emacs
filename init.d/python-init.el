@@ -28,6 +28,13 @@
   )
 
 
+(use-package apheleia
+  :defer t
+  :config
+  (setf (alist-get 'python-mode apheleia-mode-alist)
+        '(ruff))
+  )
+
 ;; (defun elpy-mode-init ()
 ;;   (py-autopep8-enable-on-save)
 ;;   (when (require 'flycheck nil t)

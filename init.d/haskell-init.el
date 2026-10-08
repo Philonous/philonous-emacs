@@ -111,10 +111,6 @@
   (add-to-list 'display-buffer-alist
                '("\\*.*compilation\\*"
                  (my/display-in-compile-target-window)))
-  (add-to-list 'display-buffer-alist
-               '("\\*eldoc\\*"
-                 (my/display-in-compile-target-window)
-                 (inhibit-same-window . t)))
 
   :hook
   ((haskell-mode . subword-mode)
@@ -166,4 +162,90 @@ Each element of COMMANDS is a list (PROGRAM . ARGS)."
 
 (use-package eglot
   :hook
-  ((haskell-mode . haskell-init--eglot-dwim)))
+  ((haskell-mode . haskell-init--eglot-dwim))
+  :config
+  ;; HLS settings (sent to the server under the "haskell" section).
+  ;; - sessionLoading "multipleComponents": load all Cabal components
+  ;;   (library, tests, etc.) into one session. Without it, opening a test
+  ;;   file first gives a session that can't see the library, and those
+  ;;   files silently get no diagnostics.
+  ;; - semanticTokens globalOn: enable HLS's semantic highlighting (it's
+  ;;   off by default, and Eglot requests it anyway, causing log noise).
+  (with-eval-after-load 'eglot
+    (setq-default eglot-workspace-configuration
+                  (plist-put (copy-tree (default-value 'eglot-workspace-configuration))
+                             :haskell
+                             '(:sessionLoading "multipleComponents"
+                                               :plugin (:semanticTokens (:globalOn nil))
+                                               ))))
+  ;; LSP hover uses markdown-mode for fontification which is slow when the hower is large
+  ;; Emacs can hang for seconds while it is rendering
+  ;; This is a hack that skips formatting the markup when it is large
+  ;; TODO: Report the hang as bug or check if it is already fixed.
+  ;; This might break in the future
+  (defun my/eglot-skip-huge-markup (orig markup)
+    (let ((str (if (stringp markup) markup (plist-get markup :value))))
+      (if (and str (> (length str) 20000))
+          str
+        (funcall orig markup))))
+  (advice-add 'eglot--format-markup :around #'my/eglot-skip-huge-markup)
+  )
+
+;;; Regenerate .cabal from package.yaml on save -------------------------------
+
+(defun my/hpack-package-name ()
+  "Return the top-level `name:' field of the current buffer, or nil.
+Anchored at column 0 so nested `name:' keys under executables, tests
+or flags are ignored."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^name:[ \t]*[\"']?\\([^\"'\n ]+\\)" nil t)
+      (match-string 1))))
+
+(defun my/gen-cabal-start (dir args)
+  "Run ARGS asynchronously in DIR, reporting the command and any failure."
+  (let ((default-directory dir)
+        (cmdline (mapconcat #'shell-quote-argument args " "))
+        (buf (get-buffer-create "*gen-cabal*")))
+    (with-current-buffer buf (erase-buffer))
+    (message "Regenerating cabal file: %s (in %s)" cmdline dir)
+    (make-process
+     :name "gen-cabal"
+     :buffer buf
+     :command args
+     :noquery t
+     :sentinel
+     (lambda (proc event)
+       (when (memq (process-status proc) '(exit signal))
+         (unless (and (eq (process-status proc) 'exit)
+                      (zerop (process-exit-status proc)))
+           (display-warning
+            'gen-cabal
+            (format "cabal regeneration failed (%s): %s — see *gen-cabal*"
+                    (string-trim event) cmdline)
+            :error)))))))
+
+(defun my/hpack-on-save ()
+  "After saving a package.yaml, regenerate the corresponding .cabal file.
+Prefers a Task target named after the .cabal file; falls back to hpack.
+Silently does nothing if neither is available."
+  (when (and buffer-file-name
+             (equal (file-name-nondirectory buffer-file-name) "package.yaml"))
+    (let* ((dir (file-name-directory buffer-file-name))
+           (name (my/hpack-package-name))
+           (cabal (and name (concat name ".cabal")))
+           (taskdir (and cabal
+                         (or (locate-dominating-file dir "Taskfile.yml")
+                             (locate-dominating-file dir "Taskfile.yaml")))))
+      (cond
+       ;; Task, if it is installed and actually has a target for this file.
+       ((and taskdir
+             (executable-find "task")
+             (let ((default-directory taskdir))
+               (zerop (call-process "task" nil nil nil "--summary" cabal))))
+        (my/gen-cabal-start taskdir (list "task" cabal)))
+       ;; Otherwise plain hpack, if it is on PATH.
+       ((executable-find "hpack")
+        (my/gen-cabal-start dir (list "hpack")))))))
+
+(add-hook 'after-save-hook #'my/hpack-on-save)

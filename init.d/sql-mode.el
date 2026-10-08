@@ -30,18 +30,19 @@
         )))
 
 (defun sql-mode-init ()
+  (require 'persistent-sql-log)
   (define-key sql-mode-map (kbd "M-`") 'sql--go-to-sql-buffer)
   (define-key sql-mode-map (kbd "C-c C-k") 'sql--clear-interactive-buffer)
   )
 
 
 (defun custom-sql-interactive-mode-hook ()
-    (define-key sql-interactive-mode-map (kbd "C-c C-k")
-      'comint-clear-buffer )
-    (define-key sql-interactive-mode-map (kbd "M-`")
-      'sql--go-to-old-window )
-    (sql-set-product-feature 'postgres :prompt-regexp "^[-[:alnum:]_]*=[#>] ")
-    (sql-set-product-feature 'postgres :prompt-cont-regexp "^[-[:alnum:]_]*[-(][#>] "))
+  (define-key sql-interactive-mode-map (kbd "C-c C-k")
+              'comint-clear-buffer )
+  (define-key sql-interactive-mode-map (kbd "M-`")
+              'sql--go-to-old-window )
+  (sql-set-product-feature 'postgres :prompt-regexp "^[-[:alnum:]_]*=[#>] ")
+  (sql-set-product-feature 'postgres :prompt-cont-regexp "^[-[:alnum:]_]*[-(][#>] "))
 
 
 (add-hook 'sql-mode-hook 'custom-sql-interactive-mode-hook)
@@ -76,38 +77,18 @@
 
 (sql-add-product 'postgres-docker "Postgres-docker"
                  `(:free-software t
-                   :font-lock sql-mode-postgres-font-lock-keywords
-                   :sqli-program "docker"
-                   :sqli-options sql-postgres-options
-                   :sqli-login sql-postgres-login-params
-                   :sqli-comint-func sql-comint-postgres-docker
-                   :list-all '("\\d+" . "\\dS+")
-                   :list-table '("\\d+ %s" . "\\dS+ %s")
-                   :completion-object sql-postgres-completion-object
-                   :prompt-regexp "^[-[:alnum:]_]*=[#>] "
-                   ;; :prompt-regexp "^[[:alnum:]_]*=[#>] "  ; Old one from postgres. Doesn't work with hyphens
-                   :prompt-length 5
-                   ;; :prompt-cont-regexp "^[[:alnum:]_]*[-(][#>] " ; doesn't work with hyphens
-                   :prompt-cont-regexp "^[-[:alnum:]_]*[-(][#>] "
-                   :input-filter sql-remove-tabs-filter
-                   :terminator '("\\(^\\s-*\\\\g$\\|;\\)" . "\\g")))
-
-(defcustom sql-format-command "sqlformat -ra -k upper -"
-  "Command to run to format SQL strings"
-  :type 'string
-  :group 'sql
-  )
-
-(defun sql-format--region ()
-  (shell-command-on-region (point-min) (point-max) sql-format-command nil t (get-buffer-create "*sqlformat: error*") t)
-  (goto-char (point-min))
-  (flush-lines "^[[:space:]]*$"))
-
-
-(defun sql-format ()
-  (interactive)
-  (if (use-region-p)
-      (save-restriction
-        (narrow-to-region (region-beginning) (region-end))
-        (sql-format--region))
-    (sql-format--region)))
+                                  :font-lock sql-mode-postgres-font-lock-keywords
+                                  :sqli-program "docker"
+                                  :sqli-options sql-postgres-options
+                                  :sqli-login sql-postgres-login-params
+                                  :sqli-comint-func sql-comint-postgres-docker
+                                  :list-all '("\\d+" . "\\dS+")
+                                  :list-table '("\\d+ %s" . "\\dS+ %s")
+                                  :completion-object sql-postgres-completion-object
+                                  :prompt-regexp "^[-[:alnum:]_]*=[#>] "
+                                  ;; :prompt-regexp "^[[:alnum:]_]*=[#>] "  ; Old one from postgres. Doesn't work with hyphens
+                                  :prompt-length 5
+                                  ;; :prompt-cont-regexp "^[[:alnum:]_]*[-(][#>] " ; doesn't work with hyphens
+                                  :prompt-cont-regexp "^[-[:alnum:]_]*[-(][#>] "
+                                  :input-filter sql-remove-tabs-filter
+                                  :terminator '("\\(^\\s-*\\\\g$\\|;\\)" . "\\g")))
