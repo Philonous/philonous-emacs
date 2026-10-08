@@ -1,0 +1,58 @@
+# Taskfile.yml
+version: "3"
+
+vars:
+  EMACS_DIR: "{{.TASK_DIR}}"
+
+tasks:
+  default:
+    deps: [compile]
+  compile:
+    desc: Byte-compile personal config files
+    cmds:
+      - >-
+        emacs --batch
+        --eval "(let ((default-directory \"{{.EMACS_DIR}}/lisp\")) (normal-top-level-add-subdirs-to-load-path))"
+        --eval "(add-to-list 'load-path \"{{.EMACS_DIR}}/lisp\")"
+        --eval "(add-to-list 'load-path \"{{.EMACS_DIR}}/init.d\")"
+        --eval "(package-initialize)"
+        --eval "(setq byte-compile-warnings '(not free-vars unresolved))"
+        --eval "(byte-recompile-directory \"{{.EMACS_DIR}}/lisp\" 0 t)"
+        --eval "(byte-recompile-directory \"{{.EMACS_DIR}}/init.d\" 0 t)"
+        --eval "(byte-recompile-file \"{{.EMACS_DIR}}/init.el\" nil 0)"
+
+  native-compile:
+    desc: Native-compile personal config files (synchronous, updates eln-cache)
+    cmds:
+      - >-
+        emacs --batch
+        --eval "(let ((default-directory \"{{.EMACS_DIR}}/lisp\")) (normal-top-level-add-subdirs-to-load-path))"
+        --eval "(add-to-list 'load-path \"{{.EMACS_DIR}}/lisp\")"
+        --eval "(add-to-list 'load-path \"{{.EMACS_DIR}}/init.d\")"
+        --eval "(package-initialize)"
+        --eval "(mapc #'native-compile (directory-files-recursively \"{{.EMACS_DIR}}/lisp\" \"\\\\.el$\"))"
+        --eval "(mapc #'native-compile (directory-files-recursively \"{{.EMACS_DIR}}/init.d\" \"\\\\.el$\"))"
+        --eval "(native-compile \"{{.EMACS_DIR}}/init.el\")"
+
+  fix-lexical:
+    desc: Add lexical-binding cookie to .el files missing it
+    cmds:
+      - |
+        find init.d lisp -name '*.el' -type f | while read -r f; do
+          grep -q 'lexical-binding' "$f" && continue
+          sed -i '1i;;; -*- lexical-binding: t; -*-' "$f"
+          echo "Fixed: $f"
+        done
+
+  unfix-lexical:
+    desc: Remove mangled lexical-binding cookies from line 1
+    cmds:
+      - |
+        find init.d lisp -name '*.el' -type f | while read -r f; do
+          sed -i 's| -\*- lexical-binding: t; -\*-||' "$f"
+          echo "Cleaned: $f"
+        done
+  clean:
+    desc: Remove .elc files from personal config dirs
+    cmds:
+      - find init.d lisp -name '*.elc' -delete
