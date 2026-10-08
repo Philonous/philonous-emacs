@@ -9,6 +9,17 @@
   :config
   (load-theme 'zenburn t))
 
+;; Personal face tweaks live in their own theme rather than in
+;; custom.el, so Customize never saves them and they stack on top of the
+;; main theme.
+(deftheme my-overrides "Personal face overrides on top of the main theme.")
+(custom-theme-set-faces
+ 'my-overrides
+ '(hl-line ((t (:background "#424242"))))
+ '(font-lock-function-name-face ((t (:underline t))))
+ '(font-lock-type-face ((t (:weight bold)))))
+(enable-theme 'my-overrides)
+
 (defun select-fontsize ()
   "Select default font size depending on monitor geometry."
   (let* ((geom (frame-monitor-attribute 'geometry))
@@ -65,7 +76,9 @@
       ring-bell-function 'ignore
       require-final-newline 'visit-save
       completion-cycle-threshold 10
-      backup-by-copying t)
+      backup-by-copying t
+      kill-whole-line t
+      vc-follow-symlinks nil)
 
 (setq-default indent-tabs-mode nil
               fill-column 80)
@@ -109,6 +122,18 @@
   (tramp-use-scp-direct-remote-copying t)
   (remote-file-name-inhibit-locks t)
   )
+
+(use-package ediff
+  :ensure nil
+  :defer t
+  :custom
+  (ediff-window-setup-function #'ediff-setup-windows-plain))
+
+(use-package flyspell
+  :ensure nil
+  :defer t
+  :custom
+  (flyspell-issue-message-flag nil))
 
 (use-package auth-source
   :ensure nil
@@ -211,7 +236,8 @@
 (use-package magit
   :bind ("C-x g" . magit-status)
   :custom
-  (magit-diff-refine-hunk (quote all)))
+  (magit-diff-refine-hunk 'all)
+  (magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18)))
 
 (use-package majutsu
   :vc (:url "https://github.com/0WD0/majutsu")
@@ -244,6 +270,11 @@
          ("C->"       . mc/mark-next-like-this)
          ("C-<"       . mc/mark-previous-like-this)
          ("C-c C-<"   . mc/mark-all-like-this)))
+
+(use-package markdown-mode
+  :defer t
+  :custom
+  (markdown-command "pandoc"))
 
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")

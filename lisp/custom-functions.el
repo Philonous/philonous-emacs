@@ -554,10 +554,12 @@ Repeated invocations toggle between the two most recently open buffers."
 
 (defun my/set-error-face (face color alpha &optional style)
   "Set FACE to a wave underline in COLOR with background blended at ALPHA.
-STYLE defaults to `wave'."
+STYLE defaults to `wave'.  The spec goes into the `my-overrides' theme
+\(see !global-init.el) so Customize doesn't save it to custom.el."
   (let ((bg (face-background 'default nil t))
         (st (or style 'wave)))
-    (custom-set-faces
+    (custom-theme-set-faces
+     'my-overrides
      `(,face ((t (:underline (:style ,st :color ,color)
                              :background ,(my/blend-colors color bg alpha))))))))
 

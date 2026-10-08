@@ -73,6 +73,9 @@
   (haskell-indentation-layout-offset 2)
   (haskell-indentation-left-offset 2)
   (haskell-notify-p t)
+  (haskell-process-args-cabal-repl nil)
+  (haskell-process-args-stack-ghci
+   '("--ghci-options=-ferror-spans -fdiagnostics-color=never" "--color" "never"))
   (haskell-process-log t)
   (haskell-process-path-cabal "cabal")
   (haskell-process-path-cabal-ghci "cabal")
@@ -81,7 +84,7 @@
   (haskell-process-suggest-overloaded-strings t)
   (haskell-process-suggest-remove-import-lines nil)
   (haskell-process-suggest-restart nil)
-  (haskell-process-type 'stack-ghci)
+  (haskell-process-type 'auto)
   (haskell-process-use-presentation-mode nil)
   (haskell-tags-on-save t)
 

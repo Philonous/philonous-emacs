@@ -3,6 +3,11 @@
 (require 'sql)
 (require 'comint)
 
+(setopt sql-connection-alist
+        '(("local-devel" (sql-product 'postgres) (sql-user "postgres")
+           (sql-server "localhost") (sql-database "postgres")
+           (sql-port 5432))))
+
 (defvar sql--process-old-window nil)
 
 (defun sql--go-to-sql-buffer ()

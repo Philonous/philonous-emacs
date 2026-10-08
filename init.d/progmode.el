@@ -101,6 +101,8 @@ Only fall back to warnings/notes when no errors exist."
         ("c" . my/project-compile)))
 
 (use-package eldoc
+  :custom
+  (eldoc-echo-area-use-multiline-p 10)
   :config
   (add-to-list 'display-buffer-alist
                '("\\*eldoc\\*"

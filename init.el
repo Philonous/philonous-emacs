@@ -4,6 +4,8 @@
 ;; (e.g. package.el saving `package-selected-packages') doesn't write
 ;; them into init.el.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+;; Load Customize settings first, so that settings in init.d/ win.
+(load custom-file 'noerror)
 
 (eval-when-compile (require 'use-package))
 
@@ -55,6 +57,5 @@
         init-files))
 
 
-(load custom-file)
 (put 'dired-find-alternate-file 'disabled nil)
 (put 'narrow-to-region 'disabled nil)

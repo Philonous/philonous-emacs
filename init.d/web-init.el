@@ -4,6 +4,12 @@
 (require 'compile)
 (require 'subr-x)
 
+(use-package js
+  :ensure nil
+  :defer t
+  :custom
+  (js-indent-level 2))
+
 (add-to-list 'compilation-error-regexp-alist-alist
              '(eslint "^\\([^:\n]+\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3))
 (add-to-list 'compilation-error-regexp-alist 'eslint)
